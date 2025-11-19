@@ -232,8 +232,8 @@ def creer_cycle(chemin, i, j):
 
     Principe:
     1. Vérifier les cycles directs (A->B déjà présent, on veut ajouter B->A)
-    2. Remonter depuis j pour voir si on peut atteindre i
-    Si oui, ajouter (i, j) créerait un cycle.
+    2. Vérifier si on peut atteindre i depuis j en suivant les successeurs
+       (si j mène à i, alors ajouter i->j créerait un cycle)
     """
     if not chemin:
         return False
@@ -245,26 +245,145 @@ def creer_cycle(chemin, i, j):
         if src == j and dst == i:
             return True
 
-    # 2. Construire un dictionnaire des prédécesseurs
-    predecesseurs = {}
+    # 2. Construire un dictionnaire des successeurs
+    successeurs = {}
     for arc in chemin:
         src, dst, _ = arc
-        predecesseurs[dst] = src
+        successeurs[src] = dst
 
-    # 3. Remonter depuis j
+    # 3. Suivre les successeurs depuis j pour voir si on peut atteindre i
+    # Si oui, ajouter i->j créerait un cycle
     courant = j
     visite = set()
 
-    while courant in predecesseurs:
+    while courant in successeurs:
         if courant in visite:  # Cycle détecté dans le chemin existant
             break
         visite.add(courant)
-        courant = predecesseurs[courant]
+        courant = successeurs[courant]
 
-        if courant == i:  # On a atteint i en remontant depuis j
-            return True
+        if courant == i:  # On a atteint i en partant de j
+            return True  # Ajouter i->j créerait un cycle
 
     return False
+
+def reorganiser_chemin(chemin):
+    """
+    Réorganise le chemin pour obtenir une séquence ordonnée de reads.
+
+    Le chemin glouton peut contenir des arcs non connectés ou dans le désordre.
+    Cette fonction reconstruit des chaînes linéaires ordonnées.
+
+    Algorithme:
+    1. Construire un graphe successeurs[i] = (j, poids)
+    2. Trouver les points de départ (reads sans prédécesseur)
+    3. Pour chaque point de départ, suivre la chaîne jusqu'au bout
+    4. Retourner la chaîne la plus longue
+
+    Paramètres:
+        chemin: array de triplets (i, j, poids)
+
+    Retourne:
+        list: chemin réorganisé [(i, j, poids), ...]
+    """
+    if len(chemin) == 0:
+        return []
+
+    # Construire le graphe des successeurs et prédécesseurs
+    successeurs = {}  # successeurs[i] = (j, poids)
+    predecesseurs = set()  # ensemble des reads qui ont un prédécesseur
+    tous_reads = set()
+
+    for arc in chemin:
+        i, j, poids = arc
+        successeurs[i] = (j, poids)
+        predecesseurs.add(j)
+        tous_reads.add(i)
+        tous_reads.add(j)
+
+    # Trouver les points de départ (reads sans prédécesseur)
+    points_depart = tous_reads - predecesseurs
+
+    print(f"\nRéorganisation du chemin:")
+    print(f"  Nombre d'arcs: {len(chemin)}")
+    print(f"  Nombre de reads impliqués: {len(tous_reads)}")
+    print(f"  Points de départ trouvés: {len(points_depart)}")
+
+    # Construire toutes les chaînes possibles
+    chaines = []
+    for depart in points_depart:
+        chaine = []
+        courant = depart
+        visite = set()
+
+        # Suivre la chaîne tant qu'il y a un successeur
+        while courant in successeurs and courant not in visite:
+            visite.add(courant)
+            suivant, poids = successeurs[courant]
+            chaine.append([courant, suivant, poids])
+            courant = suivant
+
+        if chaine:
+            chaines.append(chaine)
+            print(f"  Chaîne trouvée: {len(chaine)} arcs, départ={depart}")
+
+    # Retourner la chaîne la plus longue
+    if not chaines:
+        print("  ATTENTION: Aucune chaîne valide trouvée!")
+        return []
+    print(f'Il y a {len(chaines)} chaines différentes')
+    chaine_max = max(chaines, key=len)
+    print(f"  Chaîne sélectionnée: {len(chaine_max)} arcs")
+
+    return chaine_max
+
+
+def consensus(Reads, chemin):
+    """
+    Construit la séquence consensus à partir des reads et du chemin.
+
+    Algorithme:
+    1. Réorganiser le chemin pour avoir une séquence ordonnée
+    2. Assembler les reads en utilisant les chevauchements
+
+    Paramètres:
+        Reads: array de reads (séquences)
+        chemin: array de triplets (i, j, poids)
+
+    Retourne:
+        str: séquence consensus assemblée
+    """
+    if len(chemin) == 0:
+        print("ERREUR: Chemin vide, impossible de construire un consensus")
+        return ""
+
+    # Étape 1: Réorganiser le chemin
+    chemin_ordonne = reorganiser_chemin(chemin)
+
+    if len(chemin_ordonne) == 0:
+        print("ERREUR: Impossible de réorganiser le chemin")
+        return ""
+
+    # Étape 2: Assembler les reads
+    print(f"\nAssemblage du consensus:")
+
+    # Premier assemblage
+    i0, j0, p0 = chemin_ordonne[0]
+    seq = Reads[i0] + Reads[j0][p0:]
+    print(f"  Initial: read {i0} + read {j0}[{p0}:] -> {len(seq)} bp")
+
+    # Assemblages suivants
+    for k in range(1, len(chemin_ordonne)):
+        i, j, p = chemin_ordonne[k]
+        seq = seq + Reads[j][p:]
+        if (k + 1) % 100 == 0:
+            print(f"  Progression: {k + 1}/{len(chemin_ordonne)} reads assemblés -> {len(seq)} bp")
+
+    print(f"  Consensus final: {len(seq)} bp")
+    print(f"  Nombre de reads utilisés: {len(chemin_ordonne) + 1}")
+
+    return seq
+
 
 '''
 seq1 = "ABCDEF"
@@ -310,6 +429,24 @@ if __name__ == "__main__":
 
         if len(chemin) > 10:
             print(f"  ... et {len(chemin) - 10} autres arcs")
+
+        # Construire le consensus
+        print(f"\n{'=' * 60}")
+        print("CONSTRUCTION DU CONSENSUS")
+        print('=' * 60)
+        sequence_consensus = consensus(Reads, chemin)
+
+        if sequence_consensus:
+            print(f"\n{'=' * 60}")
+            print("RÉSULTAT FINAL")
+            print('=' * 60)
+            print(f"Longueur de la séquence consensus: {len(sequence_consensus)} bp")
+            print(f"\nDébut de la séquence (100 premiers caractères):")
+            print(sequence_consensus[:100])
+            if len(sequence_consensus) > 200:
+                print(f"\nFin de la séquence (100 derniers caractères):")
+                print(sequence_consensus[-100:])
+
 
     except Exception as e:
         print(f"Erreur lors de l'extraction : {e}")
