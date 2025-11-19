@@ -1,5 +1,5 @@
 import sys
-
+import numpy as np
 
 def extraction_reads_fastq(fichier_fastq):
     """
@@ -49,8 +49,8 @@ def extraction_reads_fastq(fichier_fastq):
     except FileNotFoundError:
         print(f"ERREUR : Le fichier '{fichier_fastq}' n'existe pas")
         raise
-
-    return Reads
+    # Convertir la liste en numpy array
+    return np.array(Reads)
 
 
 
@@ -79,26 +79,26 @@ def overlap(A, B):
     return o
 
 
-def matrice_chevauchement(Reads):
+def matrice_adjacence(Reads):
     """
     Construit la matrice d'adjacence représentant les chevauchements entre reads.
 
     Paramètres:
-        F (list): tableau de chaînes de caractères (reads)
+        F : tableau de chaînes de caractères (reads)
 
     Retourne:
         list: matrice d'entiers à deux dimensions (liste de listes)
     """
     n = len(Reads)
     # Initialiser la matrice n x n
-    M = [[0 for _ in range(n)] for _ in range(n)]
+    M = np.zeros((n, n), dtype=int)
 
     for i in range(n):
         for j in range(n):
             if i == j:
-                M[i][j] = -1
+                M[i, j] = -1
             else:
-                M[i][j] = overlap(Reads[i], Reads[j])
+                M[i, j] = overlap(Reads[i], Reads[j])
 
     return M
 
@@ -123,18 +123,17 @@ if __name__ == "__main__":
 
     try:
         # Extraire les reads
-        reads = extraction_reads_fastq(nom_fichier)
+        Reads = extraction_reads_fastq(nom_fichier)
 
         # Construire la matrice de chevauchement
         print(f"\nConstruction de la matrice de chevauchement...")
-        matrice = matrice_chevauchement(reads)
-        print(f"Matrice {len(matrice)}x{len(matrice[0])} créée")
+        matrice = matrice_adjacence(Reads)
+        print(f"Matrice {matrice.shape[0]}x{matrice.shape[1]} créée")
 
         # Afficher un échantillon de la matrice
-        #print(f"\nÉchantillon de la matrice (3x3 premiers éléments):")
-        for i in range(min(10, len(matrice))):
-            print(matrice[i][:min(10, len(matrice[0]))])
-
+        print(f"\nÉchantillon de la matrice (3x3 premiers éléments):")
+        taille = min(3, matrice.shape[0])
+        print(matrice[:taille, :taille])
 
 
     except Exception as e:
