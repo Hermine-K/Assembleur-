@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy as np
 from numpy.matlib import empty
 
@@ -37,10 +38,10 @@ def extraction_reads_fastq(fichier_fastq):
                 # Vérifier la longueur des reads
                 if compteur == 0:
                     longueur_ref = len(sequence)
-                else:
-                    if len(sequence) != longueur_ref:
-                        raise ValueError(f"ERREUR : Read de taille différente détecté. "
-                                         f"Attendu: {longueur_ref}, Trouvé: {len(sequence)}")
+                #else:
+                #    if len(sequence) != longueur_ref:
+                #        raise ValueError(f"ERREUR : Read de taille différente détecté. "
+                #                         f"Attendu: {longueur_ref}, Trouvé: {len(sequence)}")
 
                 Reads.append(sequence)
                 compteur += 1
@@ -436,6 +437,31 @@ if __name__ == "__main__":
         print('=' * 60)
         sequence_consensus = consensus(Reads, chemin)
 
+        # Définition du chemin et du nom de fichier
+        # Note: Le chemin remonte d'un dossier (..) puis va dans results/OCL_result
+        dossier_sortie = "../results/OCL_result/"
+        nom_fichier_sortie = "OLC_Result.fasta"
+        chemin_complet = os.path.join(dossier_sortie, nom_fichier_sortie)
+
+        try:
+            # Créer le dossier s'il n'existe pas (exist_ok=True évite une erreur s'il existe déjà)
+            os.makedirs(dossier_sortie, exist_ok=True)
+
+            # Écriture du fichier
+            with open(chemin_complet, "w") as f_out:
+                # Création de l'entête demandé
+                header = f">Seq1_lenght{len(sequence_consensus)}"
+                f_out.write(f"{header}\n")
+                f_out.write(f"{sequence_consensus}\n")
+
+            print(f"\nSUCCÈS : Fichier sauvegardé sous :")
+            print(f"  {os.path.abspath(chemin_complet)}")
+
+        except OSError as e:
+            print(f"\nERREUR : Impossible de créer le fichier ou le dossier.")
+            print(f"Détails : {e}")
+
+        #print(sequence_consensus)
         if sequence_consensus:
             print(f"\n{'=' * 60}")
             print("RÉSULTAT FINAL")
@@ -446,6 +472,7 @@ if __name__ == "__main__":
             if len(sequence_consensus) > 200:
                 print(f"\nFin de la séquence (100 derniers caractères):")
                 print(sequence_consensus[-100:])
+
 
 
     except Exception as e:
