@@ -2,6 +2,10 @@ import sys
 import os
 import numpy as np
 from numpy.matlib import empty
+from python_tsp.heuristics import solve_tsp_local_search
+import time
+
+
 
 
 def extraction_reads_fastq(fichier_fastq):
@@ -384,13 +388,50 @@ def consensus(Reads, chemin_brut):
     print("Fini")
     return seqs
 
+
+def tsp_layout(M):
+    """
+    Utilise un solveur TSP avec l'heuristique 2-opt pour trouver un ordre optimal des reads,
+    en maximisant les chevauchements.
+    """
+    n = M.shape[0]
+
+    # On cherche à MINIMISER un coût.
+    # Donc on convertit overlap → coût (inverse)
+    max_overlap = np.max(M[M >= 0])   # ignore -1
+    cost_matrix = max_overlap - M
+
+    # Important : les diagonales doivent être très grandes (interdit de rester sur soi-même)
+    for i in range(n):
+        cost_matrix[i, i] = 999999999
+
+    # Résolution TSP avec 2-opt (local search avec perturbation_scheme="two_opt")
+    print("Résolution TSP avec l'heuristique 2-opt...")
+    chemin, cout_total = solve_tsp_local_search(
+        cost_matrix,
+        perturbation_scheme="two_opt",
+        max_processing_time=None  # Pas de limite de temps
+    )
+
+    print("Ordre TSP obtenu (premiers 20 reads) :", chemin[:20], "...")
+    print("Coût total :", cout_total)
+
+    # On convertit l'ordre TSP → arcs (i -> j, overlap)
+    arcs = []
+    for k in range(len(chemin) - 1):
+        i = chemin[k]
+        j = chemin[k + 1]
+        arcs.append([i, j, M[i, j]])
+
+    return np.array(arcs)
+
 '''
 seq1 = "ABCDEF"
 seq2 = "DEFGHI"
 print(f"overlap('{seq1}', '{seq2}') = {overlap(seq1, seq2)}")  # Devrait retourner 3 (DEF)
 '''
 
-
+'''
 if __name__ == "__main__":
     # Vérifier qu'un fichier a été fourni en argument
     if len(sys.argv) < 2:
@@ -477,3 +518,147 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Erreur lors de l'extraction : {e}")
         sys.exit(1)
+'''
+
+
+def format_temps(secondes):
+    """
+    Convertit un temps en secondes en format lisible (heures:minutes:secondes).
+
+    Paramètres:
+        secondes (float): temps en secondes
+
+    Retourne:
+        str: temps formaté
+    """
+    heures = int(secondes // 3600)
+    minutes = int((secondes % 3600) // 60)
+    secs = secondes % 60
+
+    if heures > 0:
+        return f"{heures}h {minutes}min {secs:.2f}s"
+    elif minutes > 0:
+        return f"{minutes}min {secs:.2f}s"
+    else:
+        return f"{secs:.2f}s"
+
+if __name__ == "__main__":
+
+    # Démarrer le chronomètre
+    temps_debut = time.time()
+
+    # --- 1. Gestion des arguments et de l'option --heuristique ---
+
+    # Vérifie si le flag est présent
+    use_tsp = "--heuristique" in sys.argv
+
+    # Récupère les arguments en ignorant le flag pour trouver le fichier
+    # args_propres contient [nom_script, nom_fichier_fastq]
+    args_propres = [arg for arg in sys.argv if arg != "--heuristique"]
+
+    if len(args_propres) < 2:
+        print("Usage: python extraction_reads.py <fichier_fastq> [--heuristique]")
+        print("Exemple: python extraction_reads.py sequences.fastq --heuristique")
+        sys.exit(1)
+
+    nom_fichier = args_propres[1]
+
+    try:
+        # Extraire les reads
+        Reads, longueur_read = extraction_reads_fastq(nom_fichier)
+
+        # Construire la matrice de chevauchement
+        print(f"\nConstruction de la matrice de chevauchement...")
+        matrice = matrice_adjacence(Reads)
+        print(f"Matrice {matrice.shape[0]}x{matrice.shape[1]} créée")
+
+        # --- 2. Choix de l'algorithme (Glouton vs TSP) ---
+
+        if use_tsp:
+            print(f"\n{'=' * 60}")
+            print("RECHERCHE DU CHEMIN : HEURISTIQUE TSP")
+            print('=' * 60)
+            # Appel de la fonction TSP
+            chemin = tsp_layout(matrice)
+
+            # Nom de fichier spécifique pour l'heuristique
+            nom_fichier_sortie = "OLC_heurist_result.fasta"
+
+        else:
+            print(f"\n{'=' * 60}")
+            print("RECHERCHE DU CHEMIN : GLOUTON OPTIMISÉ")
+            print('=' * 60)
+            # Appel de la fonction Glouton par défaut
+            chemin = glouton_layout_matrice_optimise(matrice, longueur_read)
+
+            # Nom de fichier par défaut
+            nom_fichier_sortie = "OLC_Result.fasta"
+
+        print(f"Chemin trouvé avec {len(chemin)} arcs")
+
+        # Afficher les premiers arcs du chemin
+        print(f"\nPremiers arcs du chemin (i -> j, poids):")
+        for k in range(min(10, len(chemin))):
+            i, j, poids = chemin[k]
+            print(f"  {i} -> {j} (chevauchement: {poids})")
+
+        # Construire le consensus
+        print(f"\n{'=' * 60}")
+        print("CONSTRUCTION DU CONSENSUS")
+        print('=' * 60)
+
+        sequence_consensus = consensus(Reads, chemin)
+
+        # --- 3. Sauvegarde du résultat ---
+
+        dossier_sortie = "../results/OCL_result/"
+        chemin_complet = os.path.join(dossier_sortie, nom_fichier_sortie)
+
+        try:
+            # Créer le dossier s'il n'existe pas
+            os.makedirs(dossier_sortie, exist_ok=True)
+
+            # Écriture du fichier
+            with open(chemin_complet, "w") as f_out:
+                for i, seq in enumerate(sequence_consensus):
+                    # Entête dynamique selon la séquence
+                    header = f">Seq{i + 1}_lenght{len(seq)}"
+                    f_out.write(f"{header}\n")
+                    f_out.write(f"{seq}\n")
+
+            print(f"\nSUCCÈS : Fichier sauvegardé sous :")
+            print(f"  {os.path.abspath(chemin_complet)}")
+
+        except OSError as e:
+            print(f"\nERREUR : Impossible de créer le fichier ou le dossier.")
+            print(f"Détails : {e}")
+
+        # Affichage des stats finales
+        if sequence_consensus:
+            print(f"\n{'=' * 60}")
+            print("RÉSULTAT FINAL")
+            print('=' * 60)
+            print(f"Nombre de contigs générés : {len(sequence_consensus)}")
+
+            # Affichage détaillé
+            for i, seq in enumerate(sequence_consensus):
+                print(f"\n--- Séquence {i + 1} ({len(seq)} bp) ---")
+                print(f"Début : {seq[:100]}")
+                if len(seq) > 200:
+                    print(f"Fin   : {seq[-100:]}")
+
+    except Exception as e:
+        print(f"Erreur critique lors de l'exécution : {e}")
+        sys.exit(1)
+
+    finally:
+        # Calculer et afficher le temps d'exécution total
+        temps_fin = time.time()
+        temps_total = temps_fin - temps_debut
+
+        print(f"\n{'=' * 60}")
+        print("TEMPS D'EXÉCUTION")
+        print('=' * 60)
+        print(f"Temps total : {format_temps(temps_total)}")
+        print(f"Temps brut  : {temps_total:.3f} secondes")
+        print("=" * 60)
