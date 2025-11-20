@@ -333,58 +333,56 @@ def reorganiser_chemin(chemin):
         print("  ATTENTION: Aucune chaîne valide trouvée!")
         return []
     print(f'Il y a {len(chaines)} chaines différentes')
-    chaine_max = max(chaines, key=len)
-    print(f"  Chaîne sélectionnée: {len(chaine_max)} arcs")
+    #chaine_max = max(chaines, key=len)
+    #print(f"  Chaîne sélectionnée: {len(chaine_max)} arcs")
 
-    return chaine_max
+    return chaines
 
 
-def consensus(Reads, chemin):
+def consensus(Reads, chemin_brut):
     """
-    Construit la séquence consensus à partir des reads et du chemin.
-
-    Algorithme:
-    1. Réorganiser le chemin pour avoir une séquence ordonnée
-    2. Assembler les reads en utilisant les chevauchements
+    Construit les séquences consensus à partir des reads et du chemin brut.
 
     Paramètres:
         Reads: array de reads (séquences)
-        chemin: array de triplets (i, j, poids)
+        chemin_brut: array de triplets (i, j, poids) sortant de l'algo glouton
 
     Retourne:
-        str: séquence consensus assemblée
+        list: liste des séquences consensus assemblées (str)
     """
-    if len(chemin) == 0:
+    if len(chemin_brut) == 0:
         print("ERREUR: Chemin vide, impossible de construire un consensus")
-        return ""
+        return []
 
-    # Étape 1: Réorganiser le chemin
-    chemin_ordonne = reorganiser_chemin(chemin)
+    # Étape 1: Réorganiser le chemin (On le fait UNE FOIS pour tout le graphe)
+    # Cela renvoie une liste de chaînes (liste de listes)
+    toutes_les_chaines = reorganiser_chemin(chemin_brut)
 
-    if len(chemin_ordonne) == 0:
+    if len(toutes_les_chaines) == 0:
         print("ERREUR: Impossible de réorganiser le chemin")
-        return ""
+        return []
 
-    # Étape 2: Assembler les reads
-    print(f"\nAssemblage du consensus:")
+    seqs = []
+    print(f"\nAssemblages des consensus ({len(toutes_les_chaines)} chaînes trouvées):")
 
-    # Premier assemblage
-    i0, j0, p0 = chemin_ordonne[0]
-    seq = Reads[i0] + Reads[j0][p0:]
-    print(f"  Initial: read {i0} + read {j0}[{p0}:] -> {len(seq)} bp")
+    # Étape 2: Boucler sur chaque chaîne trouvée pour créer sa séquence
+    for index, chaine_ordonnee in enumerate(toutes_les_chaines):
 
-    # Assemblages suivants
-    for k in range(1, len(chemin_ordonne)):
-        i, j, p = chemin_ordonne[k]
-        seq = seq + Reads[j][p:]
-        if (k + 1) % 100 == 0:
-            print(f"  Progression: {k + 1}/{len(chemin_ordonne)} reads assemblés -> {len(seq)} bp")
+        # Premier assemblage pour cette chaîne
+        i0, j0, p0 = chaine_ordonnee[0]
+        seq = Reads[i0] + Reads[j0][p0:]
 
-    print(f"  Consensus final: {len(seq)} bp")
-    print(f"  Nombre de reads utilisés: {len(chemin_ordonne) + 1}")
+        # Assemblages suivants
+        for k in range(1, len(chaine_ordonnee)):
+            i, j, p = chaine_ordonnee[k]
+            # On ajoute la partie non-chevauchante du read suivant
+            seq = seq + Reads[j][p:]
 
-    return seq
+        print(f"  - Consensus {index + 1}: {len(seq)} bp (formé de {len(chaine_ordonnee) + 1} reads)")
+        seqs.append(seq)
 
+    print("Fini")
+    return seqs
 
 '''
 seq1 = "ABCDEF"
@@ -449,10 +447,11 @@ if __name__ == "__main__":
 
             # Écriture du fichier
             with open(chemin_complet, "w") as f_out:
-                # Création de l'entête demandé
-                header = f">Seq1_lenght{len(sequence_consensus)}"
-                f_out.write(f"{header}\n")
-                f_out.write(f"{sequence_consensus}\n")
+                for i, seq in enumerate(sequence_consensus):
+                    # Création de l'entête demandé (j'ajoute un index pour différencier les seqs)
+                    header = f">Seq{i + 1}_lenght{len(seq)}"
+                    f_out.write(f"{header}\n")
+                    f_out.write(f"{seq}\n")
 
             print(f"\nSUCCÈS : Fichier sauvegardé sous :")
             print(f"  {os.path.abspath(chemin_complet)}")
