@@ -197,7 +197,7 @@ def glouton_layout_matrice_optimise(M, len_read):
                     max_val = M[i, j]
 
         # Vérifier les conditions d'ajout
-        if max_val != 0 and max_val != len_read:
+        if max_val > 0 and max_val < len_read:
             # Vérifier les contraintes de degré
             if degre_sortant[i_max] >= 1 or degre_entrant[j_max] >= 1:
                 arcs_rejetes_degre += 1
