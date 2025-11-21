@@ -91,10 +91,10 @@ def matrice_adjacence(Reads):
     Construit la matrice d'adjacence représentant les chevauchements entre reads.
 
     Paramètres:
-        F : tableau de chaînes de caractères (reads)
+        Reads: Liste de chaînes de caractères, de taille n (reads)
 
     Retourne:
-        list: matrice d'entiers à deux dimensions (liste de listes)
+        M: Matrice d'entiers à deux dimensions, de taille n x n
     """
     n = len(Reads)
     # Initialiser la matrice n x n
@@ -179,9 +179,6 @@ def glouton_layout_matrice_optimise(M, len_read):
     degre_sortant = np.zeros(n, dtype=int)  # Nombre de successeurs
     degre_entrant = np.zeros(n, dtype=int)  # Nombre de prédécesseurs
 
-    # Copie de la matrice pour pouvoir la modifier
-    M_copy = M.copy()
-
     arcs_rejetes_degre = 0
     arcs_rejetes_cycle = 0
     m = 0
@@ -194,10 +191,10 @@ def glouton_layout_matrice_optimise(M, len_read):
         # Chercher le poids maximal dans la matrice
         for i in range(n):
             for j in range(n):
-                if i != j and M_copy[i, j] > max_val:
+                if i != j and M[i, j] > max_val:
                     i_max = i
                     j_max = j
-                    max_val = M_copy[i, j]
+                    max_val = M[i, j]
 
         # Vérifier les conditions d'ajout
         if max_val != 0 and max_val != len_read:
@@ -218,8 +215,8 @@ def glouton_layout_matrice_optimise(M, len_read):
 
         # Supprimer les arcs liés à i_max et j_max
         for k in range(n):
-            M_copy[i_max, k] = -1
-            M_copy[k, j_max] = -1
+            M[i_max, k] = -1
+            M[k, j_max] = -1
 
         m += 1
 
