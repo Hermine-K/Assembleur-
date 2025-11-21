@@ -182,8 +182,8 @@ def glouton_layout_matrice_optimise(M, len_read):
     arcs_rejetes_degre = 0
     arcs_rejetes_cycle = 0
     m = 0
-
-    while len(chemin) < n-1 or max_val > 1:
+    # les cheuvauchement plus couts (7% de la longuer du read) sont pas consulté pour eviter les misassenblies
+    while len(chemin) < n-1 or max_val > int(len_read*0.07) :
         i_max = 0
         j_max = 0
         max_val = -1
@@ -199,7 +199,7 @@ def glouton_layout_matrice_optimise(M, len_read):
 
         # Vérifier les conditions d'ajout
         print(f'max est de {max_val}')
-        if max_val > 0 :
+        if max_val > int(len_read*0.07) :
             # Vérifier les contraintes de degré
             if degre_sortant[i_max] >= 1 or degre_entrant[j_max] >= 1:
                 arcs_rejetes_degre += 1
