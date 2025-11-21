@@ -46,9 +46,9 @@ def extraction_reads_fastq(fichier_fastq):
                 #    if len(sequence) != longueur_ref:
                 #        raise ValueError(f"ERREUR : Read de taille différente détecté. "
                 #                         f"Attendu: {longueur_ref}, Trouvé: {len(sequence)}")
-
-                Reads.append(sequence)
-                compteur += 1
+                if sequence not in Reads :
+                    Reads.append(sequence)
+                    compteur += 1
 
         print(f"Extraction réussie : {compteur} reads extraits")
         print(f"Longueur des reads : {longueur_ref} bp")
@@ -183,7 +183,7 @@ def glouton_layout_matrice_optimise(M, len_read):
     arcs_rejetes_cycle = 0
     m = 0
 
-    while m < n:
+    while len(chemin) < n-1 or max_val > 1:
         i_max = 0
         j_max = 0
         max_val = -1
@@ -196,8 +196,10 @@ def glouton_layout_matrice_optimise(M, len_read):
                     j_max = j
                     max_val = M[i, j]
 
+
         # Vérifier les conditions d'ajout
-        if max_val > 0 and max_val < len_read:
+        print(f'max est de {max_val}')
+        if max_val > 0 :
             # Vérifier les contraintes de degré
             if degre_sortant[i_max] >= 1 or degre_entrant[j_max] >= 1:
                 arcs_rejetes_degre += 1
@@ -210,9 +212,10 @@ def glouton_layout_matrice_optimise(M, len_read):
                 degre_sortant[i_max] += 1
                 degre_entrant[j_max] += 1
 
-                if len(chemin) % 100 == 0:
+                if len(chemin) % 10 == 0:
                     print(f"  Progression: {len(chemin)} arcs ajoutés...")
-
+        else:
+            break
         # Supprimer les arcs liés à i_max et j_max
         for k in range(n):
             M[i_max, k] = -1
