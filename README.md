@@ -49,91 +49,322 @@ Dans cette méthode, on exploite le calcul des chevauchements pour construire un
 
 ## 4. Choix du langage de programation 
 
+Pour l’implémentation, nous avons retenu Python comme langage principal. Ce choix s’explique d’abord par sa rapidité de développement : Python permet de prototyper, tester et modifier l’algorithme d’assemblage de manière flexible, ce qui est essentiel dans un projet où plusieurs étapes (overlap, layout, consensus) doivent être ajustées progressivement.
+
+Python bénéficie également d’un écosystème scientifique très mature, particulièrement adapté aux besoins de ce projet. Par exemple :
+
+* NumPy permet de manipuler efficacement des matrices, ce qui est crucial pour la construction et l’exploitation de la matrice de chevauchement. Ses tableaux optimisés en C sont nettement plus performants que les listes natives de Python lorsqu'il s'agit d’opérations répétitives et intensives.
+
+* La bibliothèque python_tsp met à disposition des heuristiques TSP déjà optimisées, ce qui nous a permis d’intégrer une solution de layout alternative sans devoir réimplémenter manuellement un solveur complet.
+
+* Python dispose également de nombreuses autres librairies utiles (gestion de fichiers, analyse de séquences, visualisation), permettant d’envisager facilement des extensions futures.
+
+Enfin, Python offre une lisibilité élevée, ce qui facilite la compréhension et la maintenance du code, notamment dans un contexte collaboratif.
+Son adoption massive en bio-informatique en fait un choix naturel et cohérent avec les outils du domaine.
+
+## 5. Algorithmes correspondant à chacune des étapes
+
+### a. Extraction des reads : 
+
+    Algorithme ExtractionReads_FastQ
+    Entrée :
+       fichier_fastq : chemin vers le fichier FASTQ
+    Sortie :
+       Reads : liste de séquences
+
+     Début
+       Ouvrir fichier_fastq en lecture;
+       Reads <- [];
+       longueur_ref <- 0;
+       compteur <- 0;
+
+       Tant que fichier n’est pas fini faire          // Chaque read = 4 lignes dans FASTQ
+          ignorer_ligne();                           // Header 
+          sequence <- lire_ligne();
+          ignorer_ligne();                           // Ligne "+"
+          ignorer_ligne();                           // Qualité
+
+          Si compteur == 0 alors
+             longueur_ref <- longueur(sequence);
+          Sinon Si longueur(sequence) != longueur_ref alors
+             ERREUR : "Read de taille différente détecté";
+          Fin Si
+
+          Ajouter sequence à Reads;
+          compteur <- compteur + 1;
+       Fin Tant Que
+
+      Fermer le fichier;
+      Retourner Reads;
+    Fin
+
+
+### b. Matrice d’adjacence
+
+    Algorithme overlap
+    Entrée :
+       A, B : chaînes de caractères
+    Sortie :
+       o : Entier, longueur du plus long suffixe de A qui est un préfixe de B
+
+    Début
+       o <- 0;
+       lenA <- longueur(A);
+       lenB <- longueur(B);
+       max_possible <- min(lenA, lenB);
+
+        // on compare le suffixe de longueur k de A avec le préfixe de longueur k de B
+       Pour k allant de 1 à max_possible faire 
+          Si sous_chaine(A, lenA - k, lenA) = sous_chaine(B, 0, k) alors
+             o <- k;
+         Fin Si
+      Fin Pour
+
+      Retourner o;
+    Fin
 
 
 
+    Algorithme matrice_adjacence
+    Entrée: 
+       Reads: Liste de chaînes de caractères, de taille n
+    Sortie: 
+       M: matrice d'adjacence des chevauchements (Matrice d'entiers n×n)
+
+    Début
+       Pour i allant de 0 à n - 1 faire
+           Pour j allant de 0 à n - 1 faire
+               Si i = j alors
+                  M[i][j] ← -1;
+               Sinon 
+                  M[i][j] ← overlap(Reads[i], Reads[j]);
+               Fin Si
+            Fin Pour
+        Fin Pour
+
+       Retourner M
+    Fin
+
+    
+### c. Recherche du chemin hamiltonien :    
+
+    Algorithme Glouton_Layout_Matrice_Optimisé
+    Entrée :
+        M : matrice d'adjacence des chevauchements (Matrice d'entiers n×n)
+        len_read : longueur des reads (entier)
+    Sortie :
+        chemin : Liste de triplets [i, j, poids] représentant les arcs du chemin hamiltonien 
+    Début
+        chemin ← liste vide;
+
+        // Suivi des degrés pour construire un chemin sans cycles
+        degre_sortant ← liste de n zéros;
+        degre_entrant ← liste de n zéros;
+
+        arcs_rejetes_degre ← 0;
+        arcs_rejetes_cycle ← 0;
+
+        max_val ← -1;
+
+        // les chevauchements plus courts (7% de la longueur du read) sont pas consultés
+        Tant que len(chemin) < n - 1 ou max_val > len_read * 0.07 faire
+
+           max_val ← -1;
+           i_max ← 0;
+           j_max ← 0;
+
+           Pour i de 0 à n - 1 faire
+               Pour j de 0 à n - 1 faire 
+                    Si i ≠ j et M[i, j] > max_val alors 
+                      i_max ← i;
+                      j_max ← j;
+                      max_val ← M_copy[i, j];      // Chevauchement maximal
+                    Fin Si
+               Fin Pour
+           Fin Pour
+
+           // Vérification des conditions d’ajout
+           Si max_val > len_read * 0.07 alors :
+
+              // Vérifier les contraintes de degré
+              Si degre_sortant[i_max] ≥ 1 ou degre_entrant[j_max] ≥ 1 alors 
+                 arcs_rejetes_degre ← arcs_rejetes_degre + 1;
+              // Vérifier si on crée un cycle
+              Sinon Si CREER_CYCLE(chemin, i_max, j_max) = VRAI alors :
+                 arcs_rejetes_cycle ← arcs_rejetes_cycle + 1;
+            Sinon
+                 // Ajouter l'arc au chemin
+                 Ajouter [i_max, j_max, max_val] à chemin;
+                 degre_sortant[i_max] ← degre_sortant[i_max] + 1;
+                 degre_entrant[j_max] ← degre_entrant[j_max] + 1;
+             Fin Si
+
+           Fin Si
+
+           // Supprimer les arcs liés à i_max et j_max
+           Pour k de 0 à n - 1 faire
+               M[i_max, k] ← -1;
+               M[k, j_max] ← -1;
+           Fin Pour
+
+      Fin Tant que
+
+       Retourner chemin;
+    Fin
+
+    
+
+### d. Consensus :   
+
+    Algorithme reoganiser_chemin
+    Entrée
+        chemin : liste de triplets [i, j, poids] représentant des arcs
+    Sortie 
+        chemin_organisé : Liste de chaînes, où chaque chaîne est une liste ordonnée d'arcs
+
+    Début
+       Si chemin est vide alors
+          Retourner liste vide
+       Fin Si
+       
+       // Construction du graphe
+       successeurs ← dictionnaire vide 
+       predecesseurs ← ensemble vide 
+       tous_reads ← ensemble vide
+
+       Pour chaque arc dans chemin faire
+          i ← arc[0] 
+          j ← arc[1]
+          poids ← arc[2] 
+
+          successeurs[i] ← (j, poids) 
+          Ajouter j à predecesseurs 
+          Ajouter i à tous_reads 
+          Ajouter j à tous_reads
+       Fin Pour
+
+       // Identification des points de départ 
+       points_depart ← tous_reads - predecesseurs
+
+       // Construction des chaînes 
+       chaines ← liste vide
+
+       Pour chaque depart dans points_depart faire 
+          chaine ← liste vide
+          courant ← depart
+          visite ← ensemble vide
+
+          // Suivre la chaîne tant qu'il y a un successeur
+          Tant que courant ∈ successeurs et courant ∉ visite faire
+              Ajouter courant à visite 
+              suivant, poids ← successeurs[courant]
+              Ajouter [courant, suivant, poids] à chaine
+              courant ← suivant
+           Fin Tant que
+
+           Si chaine n'est pas vide alors
+              Ajouter chaine à chaines // Chaine trouvé
+           Fin Si
+       Fin Pour
+
+       Si chaines est vide alors
+          Retourner liste vide
+       Fin Si
+
+       Retourner chaines
+    Fin
 
 
 
+    Algorithme consensus
+    Entrée
+       Reads : tableau de séquences (chaînes de caractères)
+       chemin_brut : liste de triplets [i, j, poids] représentant des arcs
+    Sortie 
+       Liste de séquences consensus (chaînes de caractères)
+
+    Début
+       Si chemin_brut est vide alors
+          Afficher "ERREUR: Chemin vide" 
+          Retourner liste vide
+       Fin Si
+
+       // Réorganisation du chemin 
+       toutes_les_chaines ← reorganiser_chemin(chemin_brut)
+       Si toutes_les_chaines est vide alors
+          Afficher "ERREUR: Impossible de réorganiser" 
+          Retourner liste vide
+       Fin Si
+
+       seqs ← liste vide
+
+       // Construction du consensus pour chaque chaîne 
+       Pour index de 0 à |toutes_les_chaines| - 1 faire
+           chaine_ordonnee ← toutes_les_chaines[index] 
+           Premier assemblage i0, j0, p0 ← chaine_ordonnee[0]
+           seq ← Reads[i0] + Reads[j0][p0:]
+
+           // Assemblages suivants 
+           Pour k de 1 à |chaine_ordonnee| - 1 faire 
+              i, j, p ← chaine_ordonnee[k] 
+              seq ← seq + Reads[j][p:] 
+           Fin Pour 
+
+           Ajouter seq à seqs
+       Fin Pour
+
+       Retourner seqs
+    Fin
 
 
+## 5. Évaluation de l’assembleur sur le génome mitochondrial du varan de Komodo
+
+Le programme a été testé sur les séquences du génome mitochondrial du varan de Komodo. Le temps moyen d’exécution observé est de **4 minutes et 13,55 secondes**. Les difficultés rencontrées sont : 
+
+* Gestion et manipulation de grandes séquences d’ADN.
+
+* Optimisation de l’algorithme pour limiter le temps de calcul.
+
+* Gestion des chevauchements complexes entre reads pour un assemblage fiable.
 
 
+## 6. Analyse de l'assemblage avec QUAST
 
 
+| Métrique              | OLC_Result | Minia  | Observations                                   |
+|-----------------------|------------|--------|-----------------------------------------------|
+| Nombre de contigs      | 30         | 1      | OLC fragmente l'assemblage                   |
+| Longueur totale        | 24 835 bp  | 9 936 bp | OLC génère des duplications (ratio 2,374×)  |
+| Contig le plus long    | 2 233 bp   | 9 936 bp | Minia reconstruit la séquence complète       |
+| N50                    | 818 bp     | 9 936 bp | Contiguïté excellente pour Minia             |
+| Couverture du génome   | 98,3%      | 93,5%   | OLC couvre mieux mais avec redondance       |
 
 
+ci après les résultats de QUAST : 
 
-⚠ :
+![Pipeline OLC](images/quast.png)
 
-      ALGORITHME: reconciliation 
-      ENTREE: Arbre_gene, Arbre_espece
-      SORTIE: Affiche Arbre reconcilié
-      
-   	\\Associe chaque feuille de l'arbre de gènes à sa fauille correspondante dans l'arbre d'espece
-   	FONCTION initialize_mapping(Arbre_gene, Arbre_espece)
-   		POUR Feuille DANS Arbre_gene FAIRE
-   			Nom_gene <- Feuille.name  
-   			Nom_espece <- Nom_gene[0:3] \\recupere les noms des espece dans le nom des genes
-   			Feuille_espece <- Arbre_espece.recherche_feuille(Nom_espece) //fonction qui trouve la feuille avec le nom donné
-   			Feuille.Ajouter_feature("M", Feuille_espece) //Associe le M(g) de chaque Feuille
-   		FIN POUR
-   
-   	\\Calcule du dernier ancêtre commun (LCA) de deux noeuds
-   	FONCTION compute_lca(Noeud_1, Noeud_2)
-   		SI Noeud_1 = Noeud_2 ALORS
-   			RETOURNER Noeud_1
-   		FIN SI
-   		\\ Construire le chemin depuis Noeud_1 jusqu'à la racine
-   		Chemin_1 <- []
-   		Noeud_courant <- Noeud_1
-   		TANT QUE Noeud_courrant != None ALORS
-   			Chemin_1.Ajouter(Noeud_courant)
-   		FIN TANT QUE
-   		Chemin_1.reverse() \\interverti l'ordre de la liste
-   
-   		\\ Construire le chemin depuis Noeud_2 jusqu'à la racine
-                   Chemin_2 <- []
-                   Noeud_courant <- Noeud_2
-                   TANT QUE Noeud_courrant != None ALORS
-                           Chemin_2.Ajouter(Noeud_courant)
-   		FIN TANT QUE
-                   Chemin_2.reverse() \\interverti l'ordre de la liste
-   
-   		\\Trouver le LCA
-   		LCA <- None
-   		POUR i ALLANT de 0 À Min(|Chemin_1|, |Chemin_2|) FAIRE
-   			SI Chemin_1[i] = Chemin_2[i] ALORS
-   				LCA = Chemin_1[i]
-   			SINON FAIRE
-   				ARRET
-   			FIN SI
-   		FIN POUR
-   		RETOURNER LCA
-   
-   	\\Calcule le M(g) pour tout les noeuds internes et classifie les evenement en duplication ou spéciation
-   	FONCTION compute_mapping_and_classify(Arbre_gene)
-   		POUR Noeud DANS Arbre_gene \\la recherche se fait des feuille vers la racine de telle sorte qu’un nœud est traité lorsque tous ses fils sont traités
-   			SI NON Noeud.est_feuille() ALORS
-   				Enfant_1, Enfant_2 <- Noeud.recuperer_enfants()
-   				\\Calcule M(g) de Noeud
-   				M_1, M_2 <- recuperer_feature("M") \\Recupere le M(g) des 2 enfants
-   				LCA_Noeud <- compute_lca(M_1,M_2) \\Calculer le LCA dans l'arbre d'espèces
-   				Noeud.Ajouter_feature("M", LCA_Noeud) //Associe le M(g) de chaque Noeud
-   				\\Classifie entre duplication et spéciation
-   				SI LCA_Noeud = M_1 OU LCA_Noeud = M_2 ALORS
-   					 Noeud.Ajouter_feature("Type", "DUPLICATION") //Associe le type DUPLICATION au noeud
-   				SINON
-   					 Noeud.Ajouter_feature("Type", "SPECIATION") //Associe le type SPECIATION au noeud
-   	\\Appel des fonction et Affichage finale		
-   	initialize_mapping(Arbre_gene, Arbre_espece)
-   	compute_mapping_and_classify(Arbre_gene)
-   	Afficher(Arbre_gene)
+### a. Qualité globale :  
+
+Minia produit un assemblage nettement supérieur, avec **1 seul contig de 9 936 bp** couvrant **93,5 %** du génome de référence (10 624 bp). En comparaison, notre assembleur OLC génère **30 contigs** totalisant **24 835 bp** avec une couverture de **98,3 %**.
+
+---
+
+### b. Forces et faiblesses de l'assembleur OLC :  
+
+**Points positifs :**
+* Aucun misassemblage structurel détecté.  
+* Couverture du génome légèrement meilleure que celle de Minia.  
+* Visualisation Icarus confirme des alignements corrects avec des blocs verts.  
+* L'algorithme glouton identifie correctement les chevauchements et respecte l'ordre des reads.  
+
+**Points faibles :**
+* Fragmentation excessive : 30 contigs au lieu d'une séquence unique.  
+* Duplication des régions : ratio de duplication de 2,374, gonflant artificiellement la longueur totale.  
+* Faible contiguïté : N50 de 818 bp.  
+* Erreurs de séquence : 75 mismatchs détectés (302,48 pour 100 kbp).  
+* Incapacité de fusionner les chaînes disjointes en un contig unique, limitant l'utilité biologique de l'assemblage.  
 
 
-
-## Références
-
-[1]  Réconciliation phylogénétique. (2023, février 12). Wikipédia, l'encyclopédie libre. Page consultée le 20:21, février 12, 2023 à partir de http://fr.wikipedia.org/w/index.php?title=R%C3%A9conciliation_phylog%C3%A9n%C3%A9tique&oldid=201335036.
-
-[2]  ETE Toolkit Documentation: https://etetoolkit.org/docs/latest/tutorial/tutorial_trees.html.
+## Conclusion
+L'algorithme glouton OLC montre une bonne couverture et des chevauchements correctement identifiés, mais il échoue à produire un assemblage contigu et fiable. En revanche, Minia, basé sur un graphe de De Bruijn, produit un contig unique, sans duplication et plus exploitable biologiquement.
