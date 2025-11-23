@@ -2,124 +2,69 @@
 ### Projet : Algorithme de Reconciliation | Fait par : Conceptia Dagba Allade ; Hermine Kiossou ; Homero Sanchez
 
 
-# Algorithme de Reconciliation 
+# Algorithme d’Assemblage
 
-La réconciliation phylogénétique consiste à faire correspondre l’arbre des espèces et celui des gènes.
-Certains gènes suivent une évolution différente du reste du génome, à cause d’événements comme la duplication, la perte ou la spéciation, ce qui peut compliquer la construction de l’arbre des espèces [1].
+L’algorithme d’assemblage repose sur le principe de reconstruire une séquence d’ADN ou d’ARN à partir de fragments courts issus du séquençage. L’objectif est d’exploiter les chevauchements entre ces reads pour retrouver, autant que possible, la séquence originale. Cette étape, réalisée entièrement in silico, suit immédiatement le séquençage d’un organisme, d’une population clonale (comme une culture bactérienne) ou d’un mélange complexe.
 
-Cette méthode modélise ces événements pour mieux comprendre l’histoire du génome.
-Notre algorithme réalise cette réconciliation avec la librairie ETE3 [2], qui exploite le format Newick, un standard bioinformatique pour représenter la structure, les distances et les nœuds d’un arbre phylogénétique.
+Dans ce projet, nous avons réimplémenté un assemblage de type OLC (Overlap–Layout–Consensus). Cette approche nous a permis de suivre en détail chaque phase de l’algorithme (du calcul des chevauchements à la construction du consensus) et d’évaluer son fonctionnement sur des jeux de données réels.
 
+## 1. Overlap-Layout-Consensus
 
-## 1. Explication du Code  
+Dans cette méthode, on exploite le calcul des chevauchements pour construire un graphe permettant d’identifier les lectures qui se chevauchent (overlap), de les organiser en une séquence continue (layout) puis de corriger les erreurs afin d’obtenir une séquence consensus.
 
+* La phase **Overlap** consiste à calculer les chevauchements optimaux entre les reads par **alignement semi-global**, à construire progressivement un graphe orienté reliant les reads par des arêtes pondérées selon la qualité du chevauchement, et à exclure les reads entièrement contenus dans d’autres. On peut coder le graph de chevauchement sous la forme de **matrice d’adjacence** où la case **M[i][j]** stocke le poids du chevauchement du read i avec le read j.
 
-### a. Parse Arguments et Load  Tree
+* La phase **Layout** vise à trouver un ordre optimal des reads en résolvant un problème de type TSP, que l’on peut aborder soit par des méthodes exactes (comme la programmation dynamique ou le branch and bound), soit par des heuristiques plus rapides (glouton, plus proche voisin, k-opt, Lin Kernighan, etc.), en adaptant le problème asymétrique en un TSP symétrique.
 
-La première étape de notre algorithme de réconciliation consiste à analyser les arguments passés au script.
-Cette fonction permet d’indiquer, au moment de l’exécution, les fichiers contenant les arbres d’espèces et les arbres de gènes, ou bien de les fournir directement via la ligne de commande.
+* La phase **consensus** consiste à effectuer un alignement multiple des séquences pour en obtenir une version optimisée en score, mais comme l’alignement exact devient rapidement impraticable au-delà d’une dizaine de séquences, on utilise généralement des méthodes heuristiques.
 
-Elle s’appuie sur les librairies os (`import os`), sys (`import sys`), argparse (`import argparse`).
+## 2. Avantages et Inconvénients 
 
-La fonction gère plusieurs options :
+### a. Avantages
 
-* `--loss` : active la prise en compte des pertes de gènes
+* Très adapté aux longues lectures : Cette approche fonctionne particulièrement bien avec les longues lectures.
 
-* `--verif` : lance une vérification des arbres fournis
+* Assemblage généralement plus continus : Les longues lectures peuvent traverser des zones répétées du génome sans se casser en morceaux, ce qui permet de reconstruire des séquences plus longues et avec moins de coupures.
 
-* `-h` : affiche l’aide automatique générée par argparse
+* Modèle explicite de l’assemblage : Le graphe OLC offre une vision claire des chevauchements entre les lectures et facilite les étapes de correction ou de vérification.
 
-En complément, la fonction **load Tree** permet de charger les arbres de gènes et d’espèces à partir d’un fichier ou d’une chaîne au format Newick, format standard pour représenter la structure hiérarchique d’un arbre phylogénétique.
-
----
-
-### b. Initialize Mapping
-
-La fonction initialize_mapping() constitue la première étape du processus de réconciliation. Elle permet d’établir une correspondance initiale entre les feuilles de l’arbre des gènes et celles de l’arbre des espèces. Cette fonction ajoute une étiquette `M(g)` à chaque feuille de l'arbre de gène. 
+* Résistant aux erreurs systématiques : Les erreurs aléatoires des lectures longues sont largement corrigées lors de la phase de consensus final.
 
 ---
 
-### c. Compute Lca
+### b. Inconvénients
 
-La fonction `compute_lca` permet de trouver le dernier ancêtre commun (LCA) de deux nœuds dans l’arbre des espèces.
-Elle fonctionne en plusieurs étapes :
+* Coût computationnel élevé : Comparer toutes les lectures entre elles demande beaucoup de temps et de mémoire, ce qui nécessite des optimisations.
 
-* Pour chaque nœud, elle construit la liste de tous ses ancêtres jusqu’à la racine.
+* Peu adapté aux très grands jeux de données à courtes lectures : Avec de très nombreuses lectures courtes, l’OLC devient trop lourd et les graphes de Bruijn sont bien plus efficaces.
 
-* Elle inverse ces listes pour aller de la racine vers les nœuds.
+* Sensibilité aux régions très répétées : Certaines répétitions complexes peuvent créer des ambiguïtés dans le graphe, même avec des lectures longues.
 
-* Elle compare les listes élément par élément pour identifier le dernier nœud partagé, qui correspond au LCA.
-
-Cette fonction est utilisée dans notre algorithme pour déterminer le point d’origine commun de deux gènes dans l’arbre des espèce.
-
----
-
-### d. Compute Mappings and Classify
-
-La fonction `compute_mappings_and_classify()` correspond à la deuxième étape de l’algorithme de réconciliation, appelée phase montante. Elle sert à déterminer la correspondance M(g) pour les nœuds internes de l’arbre de gènes et à classer chaque nœud comme un événement de duplication ou de spéciation.
-
-L’arbre de gènes est parcouru en post-ordre (des feuilles vers la racine). Pour chaque nœud interne, la fonction récupère les correspondances de ses enfants dans l’arbre des espèces, détermine leur dernier ancêtre commun (LCA) et assigne ce LCA au nœud courant. Si le LCA correspond à l’un des enfants, l’événement est une duplication ; sinon, une spéciation.
-
----
-
-### e. Display Tree ASCII et Reconciliation
-
-La fonction `display_tree_ascii()` affiche dans le terminal l’arbre de gènes réconcilié sous forme ASCII, accompagné des annotations associées à chaque nœud.
-Pour chaque nœud, elle affiche soit :
-
-* le nom du gène et sa correspondance d’espèce pour les feuilles,
-
-* soit le type d’événement (duplication ou spéciation) et la correspondance M(g) pour les nœuds internes.
-
-Elle produit également un résumé final du nombre de duplications et de spéciations identifiées.
+* Pipeline plus complexe : Le processus OLC comporte plusieurs étapes distinctes qu’il peut être plus difficile de paramétrer et d’optimiser que dans un pipeline de Bruijn.
 
 
-La fonction principale `reconciliation()` appelle l’ensemble des fonctions citées plus haut. 
+## 3. Pipeline de l'outil d'assemblage OLC
 
----
+![Pipeline OLC](images/pipeline_olc.png)
 
-### f. Option Verif and Loss
-
-La fonction `option_verif_et_loss()` gère les options facultatives `--verif` et `--loss` du programme.
-Elle utilise la méthode `reconcile()` de la librairie ETE3 pour effectuer une réconciliation automatique entre l’arbre de gènes et l’arbre d’espèces, puis affiche les événements de spéciation et de duplication identifiés.
-Selon les options activées, elle peut aussi afficher graphiquement l’arbre de gènes original (`--verif`) ou l’arbre réconcilié avec pertes (`--loss`). Ces options servent à vérifier notre implémentation. 
-
-La fonction `main()` constitue le point d’entrée du programme. Elle analyse les arguments, vérifie les options, puis lance soit `option_verif_et_loss()` pour les cas spécifiques, soit la réconciliation standard via `reconciliation()`.
-
-## 2. Exécution du script  
-
-Pour exécuter le programme, il faut utiliser **Python 3.12.4** et s’assurer que le module **ete3** est installé :  
- `pip install ete3`  
-
-Les bibliothèques **os**, **sys** et **argparse** sont incluses par défaut dans Python sinon il faut les installer.  
-
-Le script se lance depuis le terminal en indiquant les arbres de gènes et d’espèces, soit sous forme de chaînes **Newick**, soit à partir de fichiers.  
-
-Les options `--verif` et `--loss` permettent respectivement d’afficher l’arbre de gènes original et l’arbre réconcilié intégrant les pertes.  
-
-#### Exemples d’utilisation :
-
-* Avec des chaînes Newick directement 
-`python3 reconciliation.py "(((AAA1,BBB1)1,CCC1)2,((CCC2,DDD1)3,DDD2)4)5;" "(((AAA,BBB)6,CCC)7,DDD)8;"`  
-
-* Avec des fichiers
-`python3 reconciliation.py gene_tree.nwk species_tree.nwk`
-
-* Avec l’option verif
-` python3 reconciliation.py gene_tree.nwk species_tree.nwk --verif` 
-
-* Avec l’option loss
-` python3 reconciliation.py gene_tree.nwk species_tree.nwk --loss`
-
-* Avec les deux options
-`python3 reconciliation.py gene_tree.nwk species_tree.nwk --verif --loss`
+## 4. Choix du langage de programation 
 
 
-⚠ : Les arbres Newick doivent toujours avoir trois lettres pour les noms d'espèces et des noeuds internes numérotés, comme dans le premier exemple fourni sinon les options loss et vérif ne pourront pas être utilisées. 
 
 
-## 3. Algorithme de Reconciliation
 
+
+
+
+
+
+
+
+
+
+
+
+⚠ :
 
       ALGORITHME: reconciliation 
       ENTREE: Arbre_gene, Arbre_espece
