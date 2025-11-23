@@ -1,5 +1,5 @@
 # Cours HAU902I : Bioinformatique avancé  
-### Projet : Algorithme de Reconciliation | Fait par : Conceptia Dagba Allade ; Hermine Kiossou ; Homero Sanchez
+### Projet : Algorithme d'Assemblage | Fait par : Conceptia Dagba Allade ; Hermine Kiossou ; Homero Sanchez
 Github : https://github.com/Hermine-K/Assembleur-
 
 # Algorithme d’Assemblage
