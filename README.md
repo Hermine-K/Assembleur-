@@ -45,7 +45,7 @@ Dans cette méthode, on exploite le calcul des chevauchements pour construire un
 
 ## 3. Pipeline de l'outil d'assemblage OLC
 
-![Pipeline OLC](images/pipeline_olc.png)
+![Pipeline OLC](images/pipeline.png)
 
 ## 4. Choix du langage de programation 
 
