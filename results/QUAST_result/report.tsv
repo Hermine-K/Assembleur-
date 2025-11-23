@@ -1,0 +1,55 @@
+Assembly	OLC_Result	minia.contigs
+# contigs (>= 0 bp)	101	4
+# contigs (>= 1000 bp)	5	1
+# contigs (>= 5000 bp)	0	1
+# contigs (>= 10000 bp)	0	0
+# contigs (>= 25000 bp)	0	0
+# contigs (>= 50000 bp)	0	0
+Total length (>= 0 bp)	45443	10187
+Total length (>= 1000 bp)	7284	9936
+Total length (>= 5000 bp)	0	9936
+Total length (>= 10000 bp)	0	0
+Total length (>= 25000 bp)	0	0
+Total length (>= 50000 bp)	0	0
+# contigs	30	1
+Largest contig	2233	9936
+Total length	24835	9936
+Reference length	10624	10624
+GC (%)	44.47	44.05
+Reference GC (%)	44.14	44.14
+N50	818	9936
+NG50	1101	9936
+N90	578	9936
+NG90	934	9936
+auN	985.2	9936.0
+auNG	2303.1	9292.6
+L50	11	1
+LG50	4	1
+L90	26	1
+LG90	8	1
+# misassemblies	0	0
+# misassembled contigs	0	0
+Misassembled contigs length	0	0
+# local misassemblies	0	0
+# scaffold gap ext. mis.	0	0
+# scaffold gap loc. mis.	0	0
+# unaligned mis. contigs	0	0
+# unaligned contigs	0 + 0 part	0 + 0 part
+Unaligned length	0	0
+Genome fraction (%)	98.296	93.524
+Duplication ratio	2.374	1.000
+# N's per 100 kbp	0.00	0.00
+# mismatches per 100 kbp	302.48	0.00
+# indels per 100 kbp	4.03	0.00
+Largest alignment	2233	9936
+Total aligned length	24795	9936
+NA50	818	9936
+NGA50	1098	9936
+NA90	578	9936
+NGA90	925	9936
+auNA	982.7	9936.0
+auNGA	2297.3	9292.6
+LA50	11	1
+LGA50	4	1
+LA90	26	1
+LGA90	8	1

@@ -1,0 +1,163 @@
+Aligning contigs to reference...
+	Aligning contigs to the reference
+Filtering alignments...
+Parsing coords...
+Loading reference...
+	Loaded [AB080275.1]
+	Total Regions: 1
+	Total Region Length: 10624
+Analyzing contigs...
+CONTIG: Seq3_lenght695 (695bp)
+Best alignment score: 689.0 (LEN: 690, IDY: 99.86), Total number of alignments: 1
+		One align captures most of this contig: 8908 9597 | 695 6 | 690 690 | 99.86 | AB080275.1 Seq3_lenght695
+
+CONTIG: Seq4_lenght1778 (1778bp)
+Best alignment score: 1776.9 (LEN: 1778, IDY: 99.94), Total number of alignments: 1
+		One align captures most of this contig: 1595 3372 | 1 1778 | 1778 1778 | 99.94 | AB080275.1 Seq4_lenght1778
+
+CONTIG: Seq6_lenght952 (952bp)
+Best alignment score: 946.0 (LEN: 952, IDY: 99.37), Total number of alignments: 1
+		One align captures most of this contig: 7399 8350 | 1 952 | 952 952 | 99.37 | AB080275.1 Seq6_lenght952
+
+CONTIG: Seq8_lenght752 (752bp)
+Best alignment score: 750.0 (LEN: 752, IDY: 99.73), Total number of alignments: 1
+		One align captures most of this contig: 7272 8023 | 752 1 | 752 752 | 99.73 | AB080275.1 Seq8_lenght752
+
+CONTIG: Seq9_lenght1059 (1059bp)
+Best alignment score: 1057.0 (LEN: 1059, IDY: 99.81), Total number of alignments: 1
+		One align captures most of this contig: 8401 9459 | 1 1059 | 1059 1059 | 99.81 | AB080275.1 Seq9_lenght1059
+
+CONTIG: Seq12_lenght670 (670bp)
+Best alignment score: 668.0 (LEN: 670, IDY: 99.70), Total number of alignments: 1
+		One align captures most of this contig: 3427 4096 | 670 1 | 670 670 | 99.7 | AB080275.1 Seq12_lenght670
+
+CONTIG: Seq13_lenght757 (757bp)
+Best alignment score: 756.0 (LEN: 757, IDY: 99.87), Total number of alignments: 1
+		One align captures most of this contig: 164 920 | 1 757 | 757 757 | 99.87 | AB080275.1 Seq13_lenght757
+
+CONTIG: Seq14_lenght600 (600bp)
+Best alignment score: 598.0 (LEN: 600, IDY: 99.67), Total number of alignments: 1
+		One align captures most of this contig: 5431 6030 | 1 600 | 600 600 | 99.67 | AB080275.1 Seq14_lenght600
+
+CONTIG: Seq18_lenght975 (975bp)
+Best alignment score: 974.0 (LEN: 975, IDY: 99.90), Total number of alignments: 1
+		One align captures most of this contig: 5733 6707 | 975 1 | 975 975 | 99.9 | AB080275.1 Seq18_lenght975
+
+CONTIG: Seq32_lenght823 (823bp)
+Best alignment score: 822.0 (LEN: 823, IDY: 99.88), Total number of alignments: 1
+		One align captures most of this contig: 3306 4128 | 1 823 | 823 823 | 99.88 | AB080275.1 Seq32_lenght823
+
+CONTIG: Seq41_lenght818 (818bp)
+Best alignment score: 815.0 (LEN: 818, IDY: 99.63), Total number of alignments: 1
+		One align captures most of this contig: 5234 6051 | 818 1 | 818 818 | 99.63 | AB080275.1 Seq41_lenght818
+
+CONTIG: Seq43_lenght2233 (2233bp)
+Best alignment score: 2223.0 (LEN: 2233, IDY: 99.55), Total number of alignments: 1
+		One align captures most of this contig: 5435 7667 | 1 2233 | 2233 2233 | 99.55 | AB080275.1 Seq43_lenght2233
+
+CONTIG: Seq46_lenght679 (679bp)
+Best alignment score: 677.0 (LEN: 679, IDY: 99.71), Total number of alignments: 1
+		One align captures most of this contig: 1168 1846 | 679 1 | 679 679 | 99.71 | AB080275.1 Seq46_lenght679
+
+CONTIG: Seq54_lenght934 (934bp)
+Best alignment score: 925.0 (LEN: 925, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 788 1712 | 4 928 | 925 925 | 100.0 | AB080275.1 Seq54_lenght934
+
+CONTIG: Seq55_lenght1101 (1101bp)
+Best alignment score: 1097.0 (LEN: 1098, IDY: 99.91), Total number of alignments: 1
+		One align captures most of this contig: 7760 8857 | 1101 4 | 1098 1098 | 99.91 | AB080275.1 Seq55_lenght1101
+
+CONTIG: Seq61_lenght624 (624bp)
+Best alignment score: 621.0 (LEN: 624, IDY: 99.52), Total number of alignments: 1
+		One align captures most of this contig: 7705 8328 | 1 624 | 624 624 | 99.52 | AB080275.1 Seq61_lenght624
+
+CONTIG: Seq63_lenght500 (500bp)
+Best alignment score: 499.0 (LEN: 500, IDY: 99.80), Total number of alignments: 1
+		One align captures most of this contig: 267 766 | 500 1 | 500 500 | 99.8 | AB080275.1 Seq63_lenght500
+
+CONTIG: Seq66_lenght612 (612bp)
+Best alignment score: 595.0 (LEN: 606, IDY: 98.19), Total number of alignments: 1
+		One align captures most of this contig: 10000 10606 | 3 608 | 607 606 | 98.19 | AB080275.1 Seq66_lenght612
+
+CONTIG: Seq68_lenght674 (674bp)
+Best alignment score: 670.0 (LEN: 671, IDY: 99.85), Total number of alignments: 1
+		One align captures most of this contig: 1683 2353 | 674 4 | 671 671 | 99.85 | AB080275.1 Seq68_lenght674
+
+CONTIG: Seq71_lenght578 (578bp)
+Best alignment score: 577.0 (LEN: 578, IDY: 99.83), Total number of alignments: 1
+		One align captures most of this contig: 3985 4562 | 1 578 | 578 578 | 99.83 | AB080275.1 Seq71_lenght578
+
+CONTIG: Seq76_lenght558 (558bp)
+Best alignment score: 557.0 (LEN: 558, IDY: 99.82), Total number of alignments: 1
+		One align captures most of this contig: 3013 3570 | 558 1 | 558 558 | 99.82 | AB080275.1 Seq76_lenght558
+
+CONTIG: Seq78_lenght655 (655bp)
+Best alignment score: 647.0 (LEN: 655, IDY: 98.78), Total number of alignments: 1
+		One align captures most of this contig: 3315 3969 | 1 655 | 655 655 | 98.78 | AB080275.1 Seq78_lenght655
+
+CONTIG: Seq81_lenght1113 (1113bp)
+Best alignment score: 1111.0 (LEN: 1112, IDY: 99.91), Total number of alignments: 1
+		One align captures most of this contig: 4197 5308 | 1112 1 | 1112 1112 | 99.91 | AB080275.1 Seq81_lenght1113
+
+CONTIG: Seq82_lenght618 (618bp)
+Best alignment score: 615.0 (LEN: 618, IDY: 99.51), Total number of alignments: 1
+		One align captures most of this contig: 6988 7605 | 618 1 | 618 618 | 99.51 | AB080275.1 Seq82_lenght618
+
+CONTIG: Seq85_lenght645 (645bp)
+Best alignment score: 640.0 (LEN: 645, IDY: 99.22), Total number of alignments: 1
+		One align captures most of this contig: 7547 8191 | 645 1 | 645 645 | 99.22 | AB080275.1 Seq85_lenght645
+
+CONTIG: Seq86_lenght560 (560bp)
+Best alignment score: 558.0 (LEN: 560, IDY: 99.64), Total number of alignments: 1
+		One align captures most of this contig: 4493 5052 | 1 560 | 560 560 | 99.64 | AB080275.1 Seq86_lenght560
+
+CONTIG: Seq92_lenght723 (723bp)
+Best alignment score: 718.0 (LEN: 720, IDY: 99.72), Total number of alignments: 1
+		One align captures most of this contig: 4950 5669 | 4 723 | 720 720 | 99.72 | AB080275.1 Seq92_lenght723
+
+CONTIG: Seq93_lenght755 (755bp)
+Best alignment score: 750.0 (LEN: 750, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 9467 10216 | 750 1 | 750 750 | 100.0 | AB080275.1 Seq93_lenght755
+
+CONTIG: Seq96_lenght874 (874bp)
+Best alignment score: 870.0 (LEN: 872, IDY: 99.77), Total number of alignments: 1
+		One align captures most of this contig: 9470 10341 | 1 872 | 872 872 | 99.77 | AB080275.1 Seq96_lenght874
+
+CONTIG: Seq98_lenght520 (520bp)
+Best alignment score: 517.0 (LEN: 517, IDY: 100.00), Total number of alignments: 1
+		One align captures most of this contig: 2636 3152 | 517 1 | 517 517 | 100.0 | AB080275.1 Seq98_lenght520
+
+Analyzing coverage...
+Writing SNPs into /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/minimap_output/OLC_Result.used_snps
+
+Analysis is finished!
+Founded SNPs were written into /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/minimap_output/OLC_Result.used_snps
+
+Results:
+	Local Misassemblies: 0
+	Misassemblies: 0
+		Relocations: 0
+		Translocations: 0
+		Inversions: 0
+	Scaffold gap extensive misassemblies: 0
+	Scaffold gap local misassemblies: 0
+	Misassembled Contigs: 0
+	Misassembled Contig Bases: 0
+	Misassemblies Inter-Contig Overlap ("Extra" Aligned Bases): 0
+Unaligned Contigs: 0 + 0 part
+Half Unaligned Contigs with Misassemblies: 0
+Unaligned Bases in Fully and Partially Unaligned Contigs: 0
+
+Ambiguously Mapped Contigs: 0
+Total Bases in Ambiguously Mapped Contigs: 0
+"Extra" Aligned Bases in Ambiguously Mapped Contigs: 0
+Note that --allow-ambiguity option was set to "one" and only first alignment per each of these contigs was used (there is no "extra" aligned bases).
+
+	Covered Bases in Reference: 10443
+	Raw Aligned Bases in Assembly: 24795
+	Total Aligned Bases in Assembly (with "Extras"): 24795
+
+	SNPs: 75
+	Insertions: 0
+	Deletions: 1
+

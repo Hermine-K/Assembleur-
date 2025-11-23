@@ -109,7 +109,7 @@ def matrice_adjacence(Reads):
 
     return M
 
-
+'''
 def glouton_layout_matrice(M, len_read):
     """
     Trouve un chemin hamiltonien approximatif en utilisant un algorithme glouton.
@@ -154,7 +154,7 @@ def glouton_layout_matrice(M, len_read):
 
     # Convertir la liste en numpy array
     return np.array(chemin)
-
+'''
 
 def glouton_layout_matrice_optimise(M, len_read):
     """
@@ -181,7 +181,7 @@ def glouton_layout_matrice_optimise(M, len_read):
 
     arcs_rejetes_degre = 0
     arcs_rejetes_cycle = 0
-    m = 0
+
     # les cheuvauchement plus couts (7% de la longuer du read) sont pas consulté pour eviter les misassenblies
     while len(chemin) < n-1 or max_val > int(len_read*0.07) :
         i_max = 0
@@ -198,7 +198,7 @@ def glouton_layout_matrice_optimise(M, len_read):
 
 
         # Vérifier les conditions d'ajout
-        print(f'max est de {max_val}')
+        #print(f'max est de {max_val}')
         if max_val > int(len_read*0.07) :
             # Vérifier les contraintes de degré
             if degre_sortant[i_max] >= 1 or degre_entrant[j_max] >= 1:
@@ -221,7 +221,7 @@ def glouton_layout_matrice_optimise(M, len_read):
             M[i_max, k] = -1
             M[k, j_max] = -1
 
-        m += 1
+
 
     print(f"\nStatistiques:")
     print(f"  Arcs rejetés (degré): {arcs_rejetes_degre}")
