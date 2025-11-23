@@ -342,7 +342,7 @@ Le programme a été testé sur les séquences du génome mitochondrial du varan
 
 ci après les résultats de QUAST : 
 
-![Pipeline OLC](images/icarus.png)
+![Résultat QUAST](images/icarus.png)
 
 ### a. Qualité globale :  
 
