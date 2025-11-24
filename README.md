@@ -49,18 +49,18 @@ Dans cette méthode, on exploite le calcul des chevauchements pour construire un
 
 ## 4. Choix du langage de programation 
 
-Pour l’implémentation, nous avons retenu Python comme langage principal. Ce choix s’explique d’abord par sa rapidité de développement : Python permet de prototyper, tester et modifier l’algorithme d’assemblage de manière flexible, ce qui est essentiel dans un projet où plusieurs étapes (overlap, layout, consensus) doivent être ajustées progressivement.
+Pour l’implémentation, nous avons retenu Python comme langage principal. Ce choix s’explique d’abord par sa rapidité de développement. Python permet de prototyper, tester et modifier l’algorithme d’assemblage de manière flexible, ce qui est essentiel dans un projet où plusieurs étapes (overlap, layout, consensus) doivent être ajustées progressivement.
 
-Python bénéficie également d’un écosystème scientifique très mature, particulièrement adapté aux besoins de ce projet. Par exemple :
+Python bénéficie également d’un écosystème scientifique, particulièrement adapté aux besoins de ce projet. Par exemple :
 
-* NumPy permet de manipuler efficacement des matrices, ce qui est crucial pour la construction et l’exploitation de la matrice de chevauchement. Ses tableaux optimisés en C sont nettement plus performants que les listes natives de Python lorsqu'il s'agit d’opérations répétitives et intensives.
+* NumPy permet de manipuler efficacement des matrices, ce qui est crucial pour la construction et l’exploitation de la matrice d'adjacence. Ses tableaux optimisés en C sont nettement plus performants que les listes natives de Python lorsqu'il s'agit d’opérations répétitives et intensives.
 
 * La bibliothèque python_tsp met à disposition des heuristiques TSP déjà optimisées, ce qui nous a permis d’intégrer une solution de layout alternative sans devoir réimplémenter manuellement un solveur complet.
 
 * Python dispose également de nombreuses autres librairies utiles (gestion de fichiers, analyse de séquences, visualisation), permettant d’envisager facilement des extensions futures.
 
 Enfin, Python offre une lisibilité élevée, ce qui facilite la compréhension et la maintenance du code, notamment dans un contexte collaboratif.
-Son adoption massive en bio-informatique en fait un choix naturel et cohérent avec les outils du domaine.
+
 
 ## 5. Algorithmes correspondant à chacune des étapes
 
@@ -326,7 +326,7 @@ Son adoption massive en bio-informatique en fait un choix naturel et cohérent a
     Fin
 
 
-## 5. Évaluation de l’assembleur sur le génome mitochondrial du varan de Komodo
+## 6. Évaluation de l’assembleur sur le génome mitochondrial du varan de Komodo
 
 Le programme a été exécuté sur les reads du génome mitochondrial du varan de Komodo. Le temps moyen obtenu est de **4 min 13,55 s**.
 Voici les difficultés rencontrées et les filtres mis en place.
@@ -335,7 +335,7 @@ Voici les difficultés rencontrées et les filtres mis en place.
 
 * Mise en place et contrôle du chemin hamiltonien
 
-    * Trouver un ordre cohérent des reads n’a pas été direct/ Il faut vérifier que chaque read n’apparaît qu’une fois et que le chemin reste valide.
+    * Trouver un ordre cohérent des reads n’a pas été direct. Il faut vérifier que chaque read n’apparaît qu’une fois et que le chemin reste valide.
 
 * Plusieurs passages ont été nécessaires pour corriger les incohérences dans l’enchaînement.
 
@@ -355,7 +355,7 @@ Voici les difficultés rencontrées et les filtres mis en place.
 
 
 
-## 6. Analyse de l'assemblage avec QUAST
+## 7. Analyse de l'assemblage avec QUAST
 
 ### a. Résultats numériques 
 
@@ -366,7 +366,7 @@ Voici les difficultés rencontrées et les filtres mis en place.
 | Longueur totale        | 10 822 bp  | 9 936 bp | OLC génère des duplications (ratio 2,374×)  |
 | Contig le plus long    |2 233 bp   | 9 936 bp | Minia reconstruit la séquence complète       |
 | N50                    | 1101 bp     | 9 936 bp | Contiguïté excellente pour Minia             |
-| Couverture du génome   | 80.055%      | 93,5%  | OLC couvre mieux mais avec redondance       |
+| Couverture du génome   | 80.055%      | 93,5%  | OLC couvre moin bien et avec des redondances      |
 
 
 ---
@@ -407,17 +407,15 @@ L’OLC produit des fragments justes mais incapables d’être fusionnés en une
 
 ![Résultat QUAST](images/plot.png)
 
-##### Minia (Bleu) : Assemblage RéussiRésultat  
+##### Minia (Bleu) : Assemblage Réussi 
 
-* Atteint la longueur de référence (10.4 kbp) dès le 1er contig (indice 1).
-
-* Minia, basé sur les graphes de De Bruijn, a produit un assemblage monocontig.
+* Atteint la longueur de référence (~10.4 kbp) dès le 1er contig (indice 1).
 
 * Il y a eu de faible fragmentation et une grande fidélité à la longueur du génome. L'algorithme a efficacement résolu les répétitions.
 
 ##### OLC (Rouge) : Assemblage Fragmenté et Redondant
 
-* Nécessite plusieurs contigs pour atteindre la longueur totale.
+* Nécessite 9 contigs pour atteindre la longueur totale (biaser par les chevauchements des contigs).
 
 * Le graphe OLC identifie correctement les chevauchements mais ne parvient pas à produire une chaîne unique.
 
@@ -429,7 +427,7 @@ L’OLC produit des fragments justes mais incapables d’être fusionnés en une
 
 Le graphique compare le contenu en GC des contigs à la référence.
 
-* Les courbes se recouvrent globalement, ce qui indique :
+* Les courbes se recouvrent globalement, ce qui indique que :
 
    * les contigs OLC ne contiennent pas d’anomalies majeures,
 
@@ -437,7 +435,7 @@ Le graphique compare le contenu en GC des contigs à la référence.
 
    * pas d’erreur systématique dans les bases.
 
-* Les variations visibles côté OLC viennent du fait que les contigs sont courts. sur de petites fenêtres, le GC (%) fluctue davantage.
+* Les variations visibles côté OLC viennent du fait que les contigs sont courts. Le GC (%) fluctue davantage.
 
 Même si l’assemblage est fragmenté, le contenu des contigs reste biologiquement cohérent.
 
@@ -457,9 +455,9 @@ Même si l’assemblage est fragmenté, le contenu des contigs reste biologiquem
 
 #### Points faibles
 
-* Fragmentation importante. Il est impossibilité de fusionner les chemins en un seul contig.
+* Fragmentation importante. Il est impossible de fusionner les chemins en un seul contig.
 
-* Duplication de régions. La longueur totale artificiellement augmentée.
+* La duplication des régions fait que la longueur totale est artificiellement augmentée.
 
 * N50 faible.
 
@@ -467,8 +465,8 @@ Même si l’assemblage est fragmenté, le contenu des contigs reste biologiquem
 
 * Résultat final difficilement exploitable biologiquement.
 
-## 7. Option heuristique TSP
-Nous avons utilisé une librairie Python TSP pour construire le chemin consensuel via un algorithme 2-OPT. Cependant, cette approche reste longue (environ 10 minutes d’exécution) et n’améliore pas les résultats par rapport à notre outil. Elle génère un unique consensus d’environ 30 000 pb accompagné de 139 petites séquences.
+## 8. Option heuristique TSP
+Nous avons utilisé une librairie Python TSP pour construire le chemin consensuel via un algorithme 2-OPT. Cependant, cette approche reste longue (environ 10 minutes d’exécution) et n’améliore pas les résultats par rapport à notre outil. Elle génère plusieurs consensus d’environ 30 000 pb fait de 139 petites séquences.
 
 ## Conclusion
 
