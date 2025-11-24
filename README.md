@@ -18,7 +18,7 @@ Dans cette méthode, on exploite le calcul des chevauchements pour construire un
 
 * La phase **consensus** consiste à effectuer un alignement multiple des séquences pour en obtenir une version optimisée en score, mais comme l’alignement exact devient rapidement impraticable au-delà d’une dizaine de séquences, on utilise généralement des méthodes heuristiques.
 
-## 2. Avantages et Inconvénients 
+## 2. Avantages et Inconvénients  
 
 ### a. Avantages
 
