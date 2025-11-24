@@ -335,6 +335,12 @@ Le programme a été testé sur les séquences du génome mitochondrial du varan
 * Optimisation de l’algorithme pour limiter le temps de calcul.
 
 * Gestion des chevauchements complexes entre reads pour un assemblage fiable.
+  
+* Définir plusieurs filtres pour améliorer l’assemblage : 
+      * Pas de prise en compte des reads dupliqué pour la construction de la matrice d’adjacence
+      * Filtre sur la taille du chevauchement minimal défini à 7% de la taille du read
+      * Filtre sur la taille du chemin consensus minimal défini à 3% du nombre total d’arc
+
 
 
 ## 6. Analyse de l'assemblage avec QUAST
@@ -359,7 +365,7 @@ ci après les résultats de QUAST :
 
 ### a. Qualité globale :  
 
-Minia produit un assemblage nettement supérieur, avec **1 seul contig de 9 936 bp** couvrant **93,5 %** du génome de référence (10 624 bp). En comparaison, notre assembleur OLC génère **30 contigs** totalisant **24 835 bp** avec une couverture de **98,3 %**.
+Minia produit un assemblage nettement supérieur, avec **1 seul contig de 9 936 bp** couvrant **93,5 %** du génome de référence (10 624 bp). En comparaison, notre assembleur OLC génère **30 contigs** totalisant **10 822 bp** avec une couverture de **80,055%**.
 
 ---
 
