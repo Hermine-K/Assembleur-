@@ -463,7 +463,7 @@ Même si l’assemblage est fragmenté, le contenu des contigs reste biologiquem
 
 * N50 faible.
 
-* Plusieurs mismatchs (75).
+* Plusieurs mismatchs.
 
 * Résultat final difficilement exploitable biologiquement.
 
