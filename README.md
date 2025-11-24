@@ -22,8 +22,8 @@ Dans cette méthode, on exploite le calcul des chevauchements pour construire un
 
 ### a. Avantages
 
-* Très adapté aux longues lectures : Cette approche fonctionne particulièrement bien avec les longues lectures.
-
+* Très adapté aux longues lectures.
+  
 * Assemblage généralement plus continus : Les longues lectures peuvent traverser des zones répétées du génome sans se casser en morceaux, ce qui permet de reconstruire des séquences plus longues et avec moins de coupures.
 
 * Modèle explicite de l’assemblage : Le graphe OLC offre une vision claire des chevauchements entre les lectures et facilite les étapes de correction ou de vérification.
