@@ -1,3 +1,3 @@
 Assembly	# misassemblies	  # contig misassemblies	    # c. relocations	    # c. translocations	    # c. inversions	  # scaffold misassemblies	    # s. relocations	    # s. translocations	    # s. inversions	# misassembled contigs	Misassembled contigs length	# local misassemblies	# scaffold gap ext. mis.	# scaffold gap loc. mis.	# unaligned mis. contigs	# mismatches	# indels	    # indels (<= 5 bp)	    # indels (> 5 bp)	Indels length
-OLC_Result	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	75	1	1	0	1
+OLC_Result	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	18	0	0	0	0
 minia.contigs	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0

@@ -109,52 +109,7 @@ def matrice_adjacence(Reads):
 
     return M
 
-'''
-def glouton_layout_matrice(M, len_read):
-    """
-    Trouve un chemin hamiltonien approximatif en utilisant un algorithme glouton.
 
-    Paramètres:
-        M (numpy.ndarray): matrice d'adjacence des chevauchements
-
-    Retourne:
-        numpy.ndarray: tableau de triplets (i, j, poids) représentant le chemin
-    """
-    n = M.shape[0]
-    chemin = []
-    m = 0
-
-    while m < n :
-        i_max = 0
-        j_max = 0
-        max_val = -1
-
-        # Chercher le poids maximal dans la matrice
-        for i in range(n):
-            for j in range(n):
-                if i != j and M[i, j] > max_val:
-                    i_max = i
-                    j_max = j
-                    max_val = M[i, j]
-
-
-        # Enregistrer l'arc avec son poids
-        if chemin==[]:
-            chemin.append([i_max, j_max, max_val])
-        elif max_val!= 0 and (chemin[-1][0]!=j_max or chemin[-1][1]!=i_max) and max_val!=len_read: #evite les chevauchement nul et les boucles à 2 reads
-            #print(f'on ajoute {max_val}')
-            chemin.append([i_max, j_max, max_val])
-
-        # Supprimer les arcs liés à i_max et j_max
-        for k in range(n):
-            M[i_max, k] = -1
-            M[k, j_max] = -1
-
-        m += 1
-
-    # Convertir la liste en numpy array
-    return np.array(chemin)
-'''
 
 def glouton_layout_matrice_optimise(M, len_read):
     """
@@ -212,7 +167,7 @@ def glouton_layout_matrice_optimise(M, len_read):
                 degre_sortant[i_max] += 1
                 degre_entrant[j_max] += 1
 
-                if len(chemin) % 10 == 0:
+                if len(chemin) % 100 == 0:
                     print(f"  Progression: {len(chemin)} arcs ajoutés...")
         else:
             break
@@ -272,6 +227,7 @@ def creer_cycle(chemin, i, j):
 
     return False
 
+
 def reorganiser_chemin(chemin):
     """
     Réorganise le chemin pour obtenir une séquence ordonnée de reads.
@@ -283,13 +239,14 @@ def reorganiser_chemin(chemin):
     1. Construire un graphe successeurs[i] = (j, poids)
     2. Trouver les points de départ (reads sans prédécesseur)
     3. Pour chaque point de départ, suivre la chaîne jusqu'au bout
-    4. Retourner la chaîne la plus longue
+    4. Filtrer les chaînes trop courtes (< 5% du nombre d'arcs)
+    5. Retourner toutes les chaînes valides
 
     Paramètres:
         chemin: array de triplets (i, j, poids)
 
     Retourne:
-        list: chemin réorganisé [(i, j, poids), ...]
+        list: liste des chaînes réorganisées [(i, j, poids), ...]
     """
     if len(chemin) == 0:
         return []
@@ -314,8 +271,14 @@ def reorganiser_chemin(chemin):
     print(f"  Nombre de reads impliqués: {len(tous_reads)}")
     print(f"  Points de départ trouvés: {len(points_depart)}")
 
+    # Calculer le seuil minimal (3% du nombre d'arcs)
+    seuil_minimal = max(1, int(len(chemin) * 0.03))
+    print(f"  Seuil minimal de chaîne: {seuil_minimal} arcs (3% de {len(chemin)})")
+
     # Construire toutes les chaînes possibles
     chaines = []
+    chaines_rejetees = 0
+
     for depart in points_depart:
         chaine = []
         courant = depart
@@ -329,16 +292,24 @@ def reorganiser_chemin(chemin):
             courant = suivant
 
         if chaine:
-            chaines.append(chaine)
-            print(f"  Chaîne trouvée: {len(chaine)} arcs, départ={depart}")
+            # Filtrer les chaînes trop courtes
+            if len(chaine) >= seuil_minimal:
+                chaines.append(chaine)
+                print(f"  Chaîne acceptée: {len(chaine)} arcs, départ={depart}")
+            else:
+                chaines_rejetees += 1
+                #print(f"  Chaîne rejetée: {len(chaine)} arcs, départ={depart} (< {seuil_minimal})")
 
-    # Retourner la chaîne la plus longue
+    # Afficher les statistiques
+    print(f"\n  Statistiques finales:")
+    print(f"    - Chaînes acceptées: {len(chaines)}")
+    print(f"    - Chaînes rejetées: {chaines_rejetees}")
+
     if not chaines:
-        print("  ATTENTION: Aucune chaîne valide trouvée!")
+        print("  ATTENTION: Aucune chaîne valide trouvée après filtrage!")
         return []
-    print(f'Il y a {len(chaines)} chaines différentes')
-    #chaine_max = max(chaines, key=len)
-    #print(f"  Chaîne sélectionnée: {len(chaine_max)} arcs")
+
+    print(f"  Il y a {len(chaines)} chaîne(s) valide(s)")
 
     return chaines
 
@@ -425,100 +396,6 @@ def tsp_layout(M):
 
     return np.array(arcs)
 
-'''
-seq1 = "ABCDEF"
-seq2 = "DEFGHI"
-print(f"overlap('{seq1}', '{seq2}') = {overlap(seq1, seq2)}")  # Devrait retourner 3 (DEF)
-'''
-
-'''
-if __name__ == "__main__":
-    # Vérifier qu'un fichier a été fourni en argument
-    if len(sys.argv) < 2:
-        print("Usage: python extraction_reads.py <fichier_fastq>")
-        print("Exemple: python extraction_reads.py sequences.fastq")
-        sys.exit(1)
-
-    # Récupérer le nom du fichier depuis les arguments
-    nom_fichier = sys.argv[1]
-
-    try:
-        # Extraire les reads
-        Reads, longueur_read = extraction_reads_fastq(nom_fichier)
-
-        # Construire la matrice de chevauchement
-        print(f"\nConstruction de la matrice de chevauchement...")
-        matrice = matrice_adjacence(Reads)
-        print(f"Matrice {matrice.shape[0]}x{matrice.shape[1]} créée")
-
-        # Afficher un échantillon de la matrice
-        print(f"\nÉchantillon de la matrice (3x3 premiers éléments):")
-        taille = min(10, matrice.shape[0])
-        print(matrice[:taille, :taille])
-
-        # Trouver le chemin hamiltonien
-        print(f"\nRecherche du chemin hamiltonien avec algorithme glouton...")
-        chemin = glouton_layout_matrice_optimise(matrice, longueur_read)
-        print(f"Chemin trouvé avec {len(chemin)} arcs")
-
-        # Afficher les premiers arcs du chemin
-        print(f"\nPremiers arcs du chemin (i -> j, poids):")
-        for k in range(min(10, len(chemin))):
-            i, j, poids = chemin[k]
-            print(f"  {i} -> {j} (chevauchement: {poids})")
-
-        if len(chemin) > 10:
-            print(f"  ... et {len(chemin) - 10} autres arcs")
-
-        # Construire le consensus
-        print(f"\n{'=' * 60}")
-        print("CONSTRUCTION DU CONSENSUS")
-        print('=' * 60)
-        sequence_consensus = consensus(Reads, chemin)
-
-        # Définition du chemin et du nom de fichier
-        # Note: Le chemin remonte d'un dossier (..) puis va dans results/OCL_result
-        dossier_sortie = "../results/OCL_result/"
-        nom_fichier_sortie = "OLC_Result.fasta"
-        chemin_complet = os.path.join(dossier_sortie, nom_fichier_sortie)
-
-        try:
-            # Créer le dossier s'il n'existe pas (exist_ok=True évite une erreur s'il existe déjà)
-            os.makedirs(dossier_sortie, exist_ok=True)
-
-            # Écriture du fichier
-            with open(chemin_complet, "w") as f_out:
-                for i, seq in enumerate(sequence_consensus):
-                    # Création de l'entête demandé (j'ajoute un index pour différencier les seqs)
-                    header = f">Seq{i + 1}_lenght{len(seq)}"
-                    f_out.write(f"{header}\n")
-                    f_out.write(f"{seq}\n")
-
-            print(f"\nSUCCÈS : Fichier sauvegardé sous :")
-            print(f"  {os.path.abspath(chemin_complet)}")
-
-        except OSError as e:
-            print(f"\nERREUR : Impossible de créer le fichier ou le dossier.")
-            print(f"Détails : {e}")
-
-        #print(sequence_consensus)
-        if sequence_consensus:
-            print(f"\n{'=' * 60}")
-            print("RÉSULTAT FINAL")
-            print('=' * 60)
-            print(f"Longueur de la séquence consensus: {len(sequence_consensus)} bp")
-            print(f"\nDébut de la séquence (100 premiers caractères):")
-            print(sequence_consensus[:100])
-            if len(sequence_consensus) > 200:
-                print(f"\nFin de la séquence (100 derniers caractères):")
-                print(sequence_consensus[-100:])
-
-
-
-    except Exception as e:
-        print(f"Erreur lors de l'extraction : {e}")
-        sys.exit(1)
-'''
 
 
 def format_temps(secondes):
@@ -564,6 +441,9 @@ if __name__ == "__main__":
     nom_fichier = args_propres[1]
 
     try:
+        print(f"\n{'=' * 60}")
+        print("Projet : Algorithme d’assemblage | Fait par : Conceptia Dagba Allade ; Hermine Kiossou ; Homero Sanchez")
+        print('=' * 60)
         # Extraire les reads
         Reads, longueur_read = extraction_reads_fastq(nom_fichier)
 
@@ -596,11 +476,7 @@ if __name__ == "__main__":
 
         print(f"Chemin trouvé avec {len(chemin)} arcs")
 
-        # Afficher les premiers arcs du chemin
-        print(f"\nPremiers arcs du chemin (i -> j, poids):")
-        for k in range(min(10, len(chemin))):
-            i, j, poids = chemin[k]
-            print(f"  {i} -> {j} (chevauchement: {poids})")
+
 
         # Construire le consensus
         print(f"\n{'=' * 60}")

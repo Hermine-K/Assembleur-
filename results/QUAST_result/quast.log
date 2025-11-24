@@ -3,11 +3,11 @@
 Version: 5.3.0
 
 System information:
-  OS: Linux-6.14.0-35-generic-x86_64-with-glibc2.41 (linux_64)
+  OS: Linux-6.14.0-36-generic-x86_64-with-glibc2.41 (linux_64)
   Python version: 3.13.9
   CPUs number: 16
 
-Started: 2025-11-21 18:02:01
+Started: 2025-11-24 09:04:51
 
 Logging to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/quast.log
 NOTICE: Output directory already exists and looks like a QUAST output dir. Existing results can be reused (e.g. previously generated alignments)!
@@ -25,7 +25,7 @@ Contigs:
   1  results/OCL_result/OLC_Result.fasta ==> OLC_Result
   2  data/QUAST_data/minia.contigs.fa ==> minia.contigs
 
-2025-11-21 18:02:02
+2025-11-24 09:04:52
 Running Basic statistics processor...
   Reference genome:
     varankomodo_reference.fasta, length = 10624, num fragments = 1, GC % = 44.14
@@ -33,7 +33,7 @@ Running Basic statistics processor...
     1  OLC_Result
     2  minia.contigs
   Calculating N50 and L50...
-    1  OLC_Result, N50 = 818, L50 = 11, auN = 985.2, Total length = 24835, GC % = 44.47, # N's per 100 kbp =  0.00
+    1  OLC_Result, N50 = 1101, L50 = 4, auN = 1374.7, Total length = 10822, GC % = 44.55, # N's per 100 kbp =  0.00
     2  minia.contigs, N50 = 9936, L50 = 1, auN = 9936.0, Total length = 9936, GC % = 44.05, # N's per 100 kbp =  0.00
   Drawing Nx plot...
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/basic_stats/Nx_plot.pdf
@@ -49,23 +49,23 @@ Running Basic statistics processor...
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/basic_stats/minia.contigs_GC_content_plot.pdf
 Done.
 
-2025-11-21 18:02:02
+2025-11-24 09:04:54
 Running Contig analyzer...
 WARNING: Version of installed minimap2 differs from its version in the QUAST package (2.28). Please make sure that you use an actual version of software.
-  2  minia.contigs
   1  OLC_Result
-  2  Logging to files /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/contigs_report_minia-contigs.stdout and contigs_report_minia-contigs.stderr...
   1  Logging to files /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/contigs_report_OLC_Result.stdout and contigs_report_OLC_Result.stderr...
-  2  Using existing alignments... 
+  2  minia.contigs
+  2  Logging to files /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/contigs_report_minia-contigs.stdout and contigs_report_minia-contigs.stderr...
   1  Aligning contigs to the reference
+  2  Using existing alignments... 
 WARNING: Version of installed minimap2 differs from its version in the QUAST package (2.28). Please make sure that you use an actual version of software.
-  2  Analysis is finished.
-
   1  /home/homero/miniconda3/envs/quast-env/bin/minimap2 -c -x asm10 -B5 -O4,16 --no-long-join \
      -r 200 -N 50 -s 65 -z 200 --mask-level 0.9 --min-occ 200 -g 2500 --score-N 2 \
      --cs -t 4 results/QUAST_result/quast_corrected_input/varankomodo_reference.fasta \
      results/QUAST_result/quast_corrected_input/OLC_Result.fasta > results/QUAST_result/contigs_reports/minimap_output/OLC_Result.coords_tmp \
      2>> results/QUAST_result/contigs_reports/contigs_report_OLC_Result.stderr
+  2  Analysis is finished.
+
   1  Analysis is finished.
 
   Creating total report...
@@ -80,9 +80,9 @@ WARNING: Version of installed minimap2 differs from its version in the QUAST pac
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/contigs_reports/misassemblies_frcurve_plot.pdf
 Done.
 
-2025-11-21 18:02:02
+2025-11-24 09:04:54
 Running NA-NGA calculation...
-  1  OLC_Result, Largest alignment = 2233, NA50 = 818, NGA50 = 1098, LA50 = 11, LGA50 = 4
+  1  OLC_Result, Largest alignment = 2233, NA50 = 1098, NGA50 = 1098, LA50 = 4, LGA50 = 4
   2  minia.contigs, Largest alignment = 9936, NA50 = 9936, NGA50 = 9936, LA50 = 1, LGA50 = 1
   Drawing cumulative plot...
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/aligned_stats/cumulative_plot.pdf
@@ -92,29 +92,29 @@ Running NA-NGA calculation...
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/aligned_stats/NGAx_plot.pdf
 Done.
 
-2025-11-21 18:02:03
+2025-11-24 09:04:55
 Running Genome analyzer...
   NOTICE: No file with genomic features were provided. Use the --features option if you want to specify it.
 
   NOTICE: No file with operons were provided. Use the -O option if you want to specify it.
-  2  minia.contigs
   1  OLC_Result
-  2  Analysis is finished.
+  2  minia.contigs
   1  Analysis is finished.
+  2  Analysis is finished.
   Drawing Genome fraction, % histogram...
     saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/genome_stats/genome_fraction_histogram.pdf
 Done.
 
 NOTICE: Genes are not predicted by default. Use --gene-finding or --glimmer option to enable it.
 
-2025-11-21 18:02:03
+2025-11-24 09:04:55
 Creating large visual summaries...
 This may take a while: press Ctrl-C to skip this step..
   1 of 2: Creating PDF with all tables and plots...
   2 of 2: Creating Icarus viewers...
 Done
 
-2025-11-21 18:02:03
+2025-11-24 09:04:56
 RESULTS:
   Text versions of total report are saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/report.txt, report.tsv, and report.tex
   Text versions of transposed total report are saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/transposed_report.txt, transposed_report.tsv, and transposed_report.tex
@@ -123,8 +123,8 @@ RESULTS:
   Icarus (contig browser) is saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/icarus.html
   Log is saved to /home/homero/Documentos/Master/M2/Bioinfo_avance/TP_assembleur/Assembleur-/results/QUAST_result/quast.log
 
-Finished: 2025-11-21 18:02:03
-Elapsed time: 0:00:02.446040
+Finished: 2025-11-24 09:04:56
+Elapsed time: 0:00:05.147658
 NOTICEs: 4; WARNINGs: 2; non-fatal ERRORs: 0
 
 Thank you for using QUAST!

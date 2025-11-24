@@ -1,5 +1,5 @@
 reference chromosomes:
-	AB080275.1 (total length: 10624 bp, total length without N's: 10624 bp, maximal covered length: 10443 bp)
+	AB080275.1 (total length: 10624 bp, total length without N's: 10624 bp, maximal covered length: 9936 bp)
 
 total genome size: 10624
 
@@ -11,5 +11,5 @@ partial gene/operon min size: 100
 assembly                 | genome    | duplication | gaps      | genes     | partial   | operons   | partial   |
                          | fraction  | ratio       | number    |           | genes     |           | operons   |
 ========================================================================================================================
-OLC_Result               | 98.296    | 2.374       | 1         | -         | -         | -         | -         |
+OLC_Result               | 80.055    | 1.270       | 5         | -         | -         | -         | -         |
 minia-contigs            | 93.524    | 1.000       | 2         | -         | -         | -         | -         |
