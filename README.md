@@ -353,6 +353,10 @@ ci après les résultats de QUAST :
 
 ![Résultat QUAST](images/icarus.png)
 
+![Résultat QUAST](images/plot.png)
+
+![Résultat QUAST](images/GC.png)
+
 ### a. Qualité globale :  
 
 Minia produit un assemblage nettement supérieur, avec **1 seul contig de 9 936 bp** couvrant **93,5 %** du génome de référence (10 624 bp). En comparaison, notre assembleur OLC génère **30 contigs** totalisant **24 835 bp** avec une couverture de **98,3 %**.
