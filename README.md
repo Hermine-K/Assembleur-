@@ -245,9 +245,10 @@ Son adoption massive en bio-informatique en fait un choix naturel et cohérent a
 
        // Identification des points de départ 
        points_depart ← tous_reads - predecesseurs
+       # Calculer le seuil minimal (5% du nombre d'arcs)
+       seuil_minimal = len(chemin) * 0.05)
+  
 
-       // Construction des chaînes 
-       chaines ← liste vide
 
        Pour chaque depart dans points_depart faire 
           chaine ← liste vide
@@ -260,6 +261,14 @@ Son adoption massive en bio-informatique en fait un choix naturel et cohérent a
               suivant, poids ← successeurs[courant]
               Ajouter [courant, suivant, poids] à chaine
               courant ← suivant
+              
+              Fin Tant que
+              Si chaine n'est pas vide alors
+	              Si len(chaine)>= seuil_minimal alors
+                     Ajouter chaine à chaines //Chaine trouvé
+                  Fin Si
+             Fin Si
+
            Fin Tant que
 
            Si chaine n'est pas vide alors
@@ -333,11 +342,11 @@ Le programme a été testé sur les séquences du génome mitochondrial du varan
 
 | Métrique              | OLC_Result | Minia  | Observations                                   |
 |-----------------------|------------|--------|-----------------------------------------------|
-| Nombre de contigs      | 30         | 1      | OLC fragmente l'assemblage                   |
-| Longueur totale        | 24 835 bp  | 9 936 bp | OLC génère des duplications (ratio 2,374×)  |
-| Contig le plus long    | 2 233 bp   | 9 936 bp | Minia reconstruit la séquence complète       |
-| N50                    | 818 bp     | 9 936 bp | Contiguïté excellente pour Minia             |
-| Couverture du génome   | 98,3%      | 93,5%   | OLC couvre mieux mais avec redondance       |
+| Nombre de contigs      | 9         | 1      | OLC fragmente l'assemblage                   |
+| Longueur totale        | 10 822 bp  | 9 936 bp | OLC génère des duplications (ratio 2,374×)  |
+| Contig le plus long    |2 233 bp   | 9 936 bp | Minia reconstruit la séquence complète       |
+| N50                    | 1101 bp     | 9 936 bp | Contiguïté excellente pour Minia             |
+| Couverture du génome   | 80.055%      | 93,5%  | OLC couvre mieux mais avec redondance       |
 
 
 ci après les résultats de QUAST : 
