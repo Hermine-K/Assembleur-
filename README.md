@@ -328,22 +328,36 @@ Son adoption massive en bio-informatique en fait un choix naturel et cohérent a
 
 ## 5. Évaluation de l’assembleur sur le génome mitochondrial du varan de Komodo
 
-Le programme a été testé sur les séquences du génome mitochondrial du varan de Komodo. Le temps moyen d’exécution observé est de **4 minutes et 13,55 secondes**. Les difficultés rencontrées sont : 
+Le programme a été exécuté sur les reads du génome mitochondrial du varan de Komodo. Le temps moyen obtenu est de **4 min 13,55 s**.
+Voici les difficultés rencontrées et les filtres mis en place.
 
-* Gestion et manipulation de grandes séquences d’ADN.
+### Difficultés rencontrées
 
-* Optimisation de l’algorithme pour limiter le temps de calcul.
+* Mise en place et contrôle du chemin hamiltonien
 
-* Gestion des chevauchements complexes entre reads pour un assemblage fiable.
-  
-* Définir plusieurs filtres pour améliorer l’assemblage : 
-      * Pas de prise en compte des reads dupliqué pour la construction de la matrice d’adjacence
-      * Filtre sur la taille du chevauchement minimal défini à 7% de la taille du read
-      * Filtre sur la taille du chemin consensus minimal défini à 3% du nombre total d’arc
+    * Trouver un ordre cohérent des reads n’a pas été direct/ Il faut vérifier que chaque read n’apparaît qu’une fois et que le chemin reste valide.
+
+* Plusieurs passages ont été nécessaires pour corriger les incohérences dans l’enchaînement.
+
+    * Construction du consensus
+
+* Le consensus n’était pas faisable tant que le chemin restait sous forme de graphe.
+
+    * Il a fallu réorganiser l’enchaînement des reads en une chaîne linéaire avant de pouvoir fusionner les segments correctement.
+
+### Filtres ajoutés pour stabiliser l’assemblage
+
+* Reads dupliqués ignorés : ils surchargeaient la matrice d’adjacence et créaient des arcs inutiles.
+
+* Chevauchement minimal fixé à 7 % : cela élimine les recouvrements trop courts, souvent non fiables.
+
+* Longueur minimale du chemin consensus à 3 % des arcs : les chemins trop petits n’apportaient rien et brouillaient les résultats.
 
 
 
 ## 6. Analyse de l'assemblage avec QUAST
+
+### a. Résultats numériques 
 
 
 | Métrique              | OLC_Result | Minia  | Observations                                   |
@@ -355,35 +369,108 @@ Le programme a été testé sur les séquences du génome mitochondrial du varan
 | Couverture du génome   | 80.055%      | 93,5%  | OLC couvre mieux mais avec redondance       |
 
 
-ci après les résultats de QUAST : 
+---
+
+### b. Lecture des visualisations QUAST
+
+#### b-1. Icarus : Alignement des contigs
 
 ![Résultat QUAST](images/icarus.png)
 
-![Résultat QUAST](images/plot.png)
+##### Référence (Minia)
 
-![Résultat QUAST](images/GC.png)
+* La référence apparaît sous la forme d’un bloc continu, sans rupture.
 
-### a. Qualité globale :  
+* Représente la structure attendue du génome mitochondrial.
 
-Minia produit un assemblage nettement supérieur, avec **1 seul contig de 9 936 bp** couvrant **93,5 %** du génome de référence (10 624 bp). En comparaison, notre assembleur OLC génère **30 contigs** totalisant **10 822 bp** avec une couverture de **80,055%**.
+* Sert de base pour vérifier l’alignement des séquences produites par notre assembleur.
+
+##### Notre assembleur OLC
+
+* Aucun misassemblage détecté : les segments produits ne se placent jamais dans une mauvaise région.
+
+* L’alignement montre seulement quelques consensus qui s’ancrent correctement sur la référence.
+
+* L’assembleur n’a pas pu produire une séquence complète :
+
+     * les contigs générés restent isolés,
+
+     * ils couvrent uniquement certaines portions du génome.
+
+* Le résultat apparaît donc sous forme de petits blocs dispersés alignés sur le bloc continu de la référence.
+
+L’OLC produit des fragments justes mais incapables d’être fusionnés en une séquence complète.
 
 ---
 
-### b. Forces et faiblesses de l'assembleur OLC :  
+#### b-2. Courbe de longueur cumulée
 
-**Points positifs :**
-* Aucun misassemblage structurel détecté.  
-* Couverture du génome légèrement meilleure que celle de Minia.  
-* Visualisation Icarus confirme des alignements corrects avec des blocs verts.  
-* L'algorithme glouton identifie correctement les chevauchements et respecte l'ordre des reads.  
+![Résultat QUAST](images/plot.png)
 
-**Points faibles :**
-* Fragmentation excessive : 30 contigs au lieu d'une séquence unique.  
-* Duplication des régions : ratio de duplication de 2,374, gonflant artificiellement la longueur totale.  
-* Faible contiguïté : N50 de 818 bp.  
-* Erreurs de séquence : 75 mismatchs détectés (302,48 pour 100 kbp).  
-* Incapacité de fusionner les chaînes disjointes en un contig unique, limitant l'utilité biologique de l'assemblage.  
+##### Minia (Bleu) : Assemblage RéussiRésultat  
 
+* Atteint la longueur de référence (10.4 kbp) dès le 1er contig (indice 1).
+
+* Minia, basé sur les graphes de De Bruijn, a produit un assemblage monocontig.
+
+* Il y a eu de faible fragmentation et une grande fidélité à la longueur du génome. L'algorithme a efficacement résolu les répétitions.
+
+##### OLC (Rouge) : Assemblage Fragmenté et Redondant
+
+* Nécessite plusieurs contigs pour atteindre la longueur totale.
+
+* Le graphe OLC identifie correctement les chevauchements mais ne parvient pas à produire une chaîne unique.
+
+---
+
+#### b-3. Profil de GC (%)
+
+![Résultat QUAST](images/GC.png)
+
+Le graphique compare le contenu en GC des contigs à la référence.
+
+* Les courbes se recouvrent globalement, ce qui indique :
+
+   * les contigs OLC ne contiennent pas d’anomalies majeures,
+
+   * pas de contamination évidente,
+
+   * pas d’erreur systématique dans les bases.
+
+* Les variations visibles côté OLC viennent du fait que les contigs sont courts. sur de petites fenêtres, le GC (%) fluctue davantage.
+
+Même si l’assemblage est fragmenté, le contenu des contigs reste biologiquement cohérent.
+
+---
+
+### c. Forces et limites de notre OLC
+
+#### Points positifs
+
+* Aucun misassemblage structurel.
+
+* Alignements corrects (blocs verts dans Icarus).
+
+* Couverture correcte malgré les filtres appliqués.
+
+* Les chevauchements et l’ordre local des reads sont bien identifiés.
+
+#### Points faibles
+
+* Fragmentation importante. Il est impossibilité de fusionner les chemins en un seul contig.
+
+* Duplication de régions. La longueur totale artificiellement augmentée.
+
+* N50 faible.
+
+* Plusieurs mismatchs (75).
+
+* Résultat final difficilement exploitable biologiquement.
+
+## 7. Option heuristique TSP
+Nous avons utilisé une librairie Python TSP pour construire le chemin consensuel via un algorithme 2-OPT. Cependant, cette approche reste longue (environ 10 minutes d’exécution) et n’améliore pas les résultats par rapport à notre outil. Elle génère un unique consensus d’environ 30 000 pb accompagné de 139 petites séquences.
 
 ## Conclusion
-L'algorithme glouton OLC montre une bonne couverture et des chevauchements correctement identifiés, mais il échoue à produire un assemblage contigu et fiable. En revanche, Minia, basé sur un graphe de De Bruijn, produit un contig unique, sans duplication et plus exploitable biologiquement.
+
+Notre approche OLC fonctionne pour détecter les chevauchements et produire des fragments fiables, mais l’algorithme glouton utilisé pour le layout ne permet pas de réunir les contigs en une séquence complète.
+Minia, basé sur un graphe de De Bruijn, produit un résultat plus contigu, sans duplication, et plus proche du génome réel.
